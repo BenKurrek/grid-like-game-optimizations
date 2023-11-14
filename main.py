@@ -26,17 +26,11 @@ def main():
     print(f"Selected Algorithm: {algorithm_name}")
 
     # Create a GeneticAlgorithm instance
-    genetic_algorithm = GeneticAlgorithm(game_name)
+    genetic_algorithm = GeneticAlgorithm(game_name, population_size=10, mutation_rate=0.1)
 
     # Evolve the population for a certain number of generations
-    best_solution = genetic_algorithm.evolve(generations=50)
-
-    print(f"Best Solution: {best_solution}")
-    # Apply the best move to the game
-    game.apply_move(best_solution)
-
-    # Save SVG to a file
-    svg_content = game.get_svg_content(best_solution, size=400)
+    best_individual = genetic_algorithm.evolve(generations=200)
+    svg_content = best_individual.visualize_best_move(size=400)
     with open("game_board.svg", "w") as svg_file:
         svg_file.write(svg_content)
 

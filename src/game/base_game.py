@@ -5,8 +5,8 @@ class BaseGame:
     def update_weights(self, weights):
         self.game.update_weights(weights)
     
-    def generate_random_state(self):
-        return self.game.generate_random_state()
+    def get_best_move(self):
+        return self.game.get_best_move()
     
     def set_random_state(self):
         return self.game.set_random_state()
@@ -14,14 +14,15 @@ class BaseGame:
     def fitness(self):
         return self.game.fitness()
 
-    def mutate(self, state):
-        return self.game.mutate(state)
+    def mutate(self):
+        return self.game.mutate()
 
     def crossover(self, game2):
-        return self.game.crossover(game2)
+        return BaseGame(self.game.crossover(game2))
 
     def get_weights(self):
         return self.game.get_weights()
 
-    def get_svg_content(self, state, size):
-        return self.game.get_svg_content(state, size)
+    def visualize_best_move(self, size):
+        best_move = self.game.get_best_move()
+        return self.game.visualize_best_move(best_move, size)

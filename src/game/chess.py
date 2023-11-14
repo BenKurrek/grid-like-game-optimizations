@@ -102,13 +102,13 @@ class ChessGame(BaseGame):
             score -= abs(evaluated_score - actual_score.score())
         return score / len(legal_moves)
     
-    def mutate(self, state):
-        board = chess.Board(state)
-        legal_moves = [str(move) for move in board.legal_moves]
-        if legal_moves:
-            move = random.choice(legal_moves)
-            board.push(chess.Move.from_uci(move))
-        return str(board.fen())
+    def mutate(self):
+        # Randomly choose 3 weights to mutate
+        weight_indices = random.sample(range(len(self.weights)), 3)
+        for weight_idx in weight_indices:
+            self.weights[weight_idx] = random.random() * weight_upper_bounds[weight_idx]
+        
+        print(f"Mutated weights.")
 
     def crossover(self, game2):
         child_weights = []
@@ -121,6 +121,22 @@ class ChessGame(BaseGame):
         child_game.update_weights(child_weights)
         return child_game
 
-    def get_svg_content(self, state, size):
-        board = chess.Board(state)
-        return chess.svg.board(board=board, size=size)
+    def get_best_move(self):
+        best_score = None
+        legal_moves = list(self.board.legal_moves)
+        for move in legal_moves:
+            evaluated_score = self.evaluate_move(move)
+            if best_score is None or evaluated_score > best_score:
+                best_score = evaluated_score
+                best_move = move
+        return move
+
+    def visualize_best_move(self, move, size):
+        return chess.svg.board(
+            board=self.board, 
+            arrows=[
+                chess.svg.Arrow(move.from_square, move.to_square, color="#0000cccc"), # Our move
+                chess.svg.Arrow(self.game_moves[0].from_square, self.game_moves[0].to_square, color="#cc0000cc") # Actual move
+                ],
+            size=size
+            )

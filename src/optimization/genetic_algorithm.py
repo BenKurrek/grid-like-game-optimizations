@@ -3,7 +3,7 @@ from src.utility.chess_extraction import extract_random_chess_positions
 from src.utility.game_chooser import create_base_game
 
 class GeneticAlgorithm:
-    def __init__(self, game_name, population_size=100, mutation_rate=0):        
+    def __init__(self, game_name, population_size=10, mutation_rate=0):        
         self.game_name = game_name
         self.population_size = population_size
         self.mutation_rate = mutation_rate
@@ -11,7 +11,6 @@ class GeneticAlgorithm:
 
     def initialize_population(self):
         if self.game_name == "chess":
-            from src.game.chess import ChessGame # Avoid circular import
             # Individuals in the population each start with the same random position.
             # Their chromosomes are made up of genes representing fitness function weights
             board_data = extract_random_chess_positions(num_positions=1)[0]
@@ -30,9 +29,6 @@ class GeneticAlgorithm:
             fitness_scores = [(individual, individual.fitness()) for individual in self.population]
             fitness_scores.sort(key=lambda x: x[1], reverse=True)
             best_individual, best_fitness = fitness_scores[0]
-
-            print(f"Generation {generation + 1}, Best Fitness: {best_fitness}")
-            print(f"Weights: {best_individual.get_weights()}\n")
             
             if target_fitness and best_fitness >= target_fitness:
                 print(f"Target fitness reached. Stopping evolution.")
@@ -58,5 +54,6 @@ class GeneticAlgorithm:
             self.population = new_population
 
             print(f"Generation {generation + 1}, Best Fitness: {best_fitness}")
+            print(f"Weights: {best_individual.get_weights()}\n")
 
         return best_individual
