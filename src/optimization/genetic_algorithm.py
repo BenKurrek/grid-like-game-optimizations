@@ -1,13 +1,27 @@
 import random
 from src.utility.chess_extraction import extract_random_chess_positions
 from src.utility.game_chooser import create_base_game
+import matplotlib.pyplot as plt
 
 class GeneticAlgorithm:
-    def __init__(self, game_name, population_size=10, mutation_rate=0):        
+    def __init__(self, game_name, population_size=10, mutation_rate=0):
+        self.history = []    
         self.game_name = game_name
         self.population_size = population_size
         self.mutation_rate = mutation_rate
         self.population = self.initialize_population()
+
+    def plot_evolution_history(self):
+        history = self.history
+
+        generations = range(1, len(history) + 1)
+        best_fitness_values = [entry["best_fitness"] for entry in history]
+
+        plt.plot(generations, best_fitness_values, marker='o')
+        plt.title('Evolution History')
+        plt.xlabel('Generation')
+        plt.ylabel('Best Fitness')
+        plt.show()
 
     def initialize_population(self):
         if self.game_name == "chess":
@@ -29,7 +43,7 @@ class GeneticAlgorithm:
             fitness_scores = [(individual, individual.fitness()) for individual in self.population]
             fitness_scores.sort(key=lambda x: x[1], reverse=True)
             best_individual, best_fitness = fitness_scores[0]
-            
+
             if target_fitness and best_fitness >= target_fitness:
                 print(f"Target fitness reached. Stopping evolution.")
                 break
@@ -53,7 +67,13 @@ class GeneticAlgorithm:
 
             self.population = new_population
 
-            print(f"Generation {generation + 1}, Best Fitness: {best_fitness}")
+            best_move = best_individual.get_best_move()
+            self.history.append({
+                "best_fitness": best_fitness,
+                "best_move": best_move,
+                "weights": best_individual.get_weights()
+            })
+            print(f"Generation {generation + 1}, Best Fitness: {best_fitness}, Best Move: {best_move}")
             print(f"Weights: {best_individual.get_weights()}\n")
 
         return best_individual

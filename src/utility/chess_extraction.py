@@ -13,7 +13,7 @@ def stockfish_evaluation(board):
 
     # Use tqdm for the loop with additional information
     for move in tqdm(board.legal_moves, desc="Evaluating Moves", unit="move", total=total_moves, position=1, unit_scale=True):
-        info = engine.analyse(board, chess.engine.Limit(time=0.001), root_moves=[move])
+        info = engine.analyse(board, chess.engine.Limit(time=0.01), root_moves=[move])
         scores[move.uci()] = info['score']
     engine.quit()
     
