@@ -5,7 +5,10 @@ import matplotlib.pyplot as plt
 
 class GeneticAlgorithm:
     def __init__(self, game_name, population_size=10, mutation_rate=0):
-        self.history = []    
+        self.history = []  
+        self.weight_history = []  
+        self.weight_labels = []
+
         self.game_name = game_name
         self.population_size = population_size
         self.mutation_rate = mutation_rate
@@ -13,14 +16,48 @@ class GeneticAlgorithm:
 
     def plot_evolution_history(self):
         history = self.history
+        weight_history = self.weight_history
 
         generations = range(1, len(history) + 1)
         best_fitness_values = [entry["best_fitness"] for entry in history]
 
-        plt.plot(generations, best_fitness_values, marker='o')
-        plt.title('Evolution History')
-        plt.xlabel('Generation')
-        plt.ylabel('Best Fitness')
+        # Figure 1: Best Fitness and Best Move Rank
+        fig1, axes1 = plt.subplots(1, 2, figsize=(18, 6))  # 1 row, 2 columns
+
+        # Plotting best fitness values
+        axes1[0].plot(generations, best_fitness_values, marker='o')
+        axes1[0].set_title('Best Fitness')
+        axes1[0].set_xlabel('Generation')
+        axes1[0].set_ylabel('Fitness')
+
+        # Plotting best move rank overtime
+        best_move_rank_values = [entry["best_move_rank"][0] for entry in history]
+        max_moves = history[0]["best_move_rank"][1]
+
+        axes1[1].plot(generations, best_move_rank_values, marker='o')
+        axes1[1].set_title('Rank of Best Move')
+        axes1[1].set_xlabel('Generation')
+        axes1[1].set_ylabel('Rank')
+        axes1[1].set_ylim(1, max_moves)
+
+        # Figure 2: Weights
+        fig2, axes2 = plt.subplots(2, 3, figsize=(18, 12))  # 2 rows, 3 columns
+
+        default_vals = [100, 300, 300, 500, 900]
+        
+        # Plotting weights
+        for i in range(5):
+            weights_values = [weights[i] for weights in weight_history]
+            axes2[i//3, i%3].plot(generations, weights_values, marker='o')
+            axes2[i//3, i%3].axhline(y=default_vals[i], color='red', linestyle='--')  # Add red line at y=100
+            axes2[i//3, i%3].set_title(f'{self.weight_labels[i]}')
+            axes2[i//3, i%3].set_xlabel('Generation')
+            axes2[i//3, i%3].set_ylabel(f'Weight')
+            axes2[i//3, i%3].set_ylim(0, 1000)  
+
+        fig1.tight_layout()
+        fig2.tight_layout()
+
         plt.show()
 
     def initialize_population(self):
@@ -39,12 +76,19 @@ class GeneticAlgorithm:
 
     def evolve(self, generations, target_fitness=None):
         for generation in range(generations):
+            fitness_scores = []
             # Evaluate the fitness scores of each individual in the population
-            fitness_scores = [(individual, individual.fitness()) for individual in self.population]
-            fitness_scores.sort(key=lambda x: x[1], reverse=True)
-            best_individual, best_fitness = fitness_scores[0]
+            for individual in self.population:
+                fitness_score, best_move, best_score = individual.fitness()
+                fitness_scores.append((individual, (fitness_score, best_move, best_score)))
+               # print(f"Chosen Move: {best_move}. Evaluated Score: {best_score}. Fitnesss: {fitness_score}")
+            
+            # Sort to get the top fitness scores for the next generation
+            fitness_scores.sort(key=lambda x: x[1][0], reverse=True)
+            best_individual, best_fitness_data = fitness_scores[0]
+            best_fitness_score, best_move, best_score = best_fitness_data
 
-            if target_fitness and best_fitness >= target_fitness:
+            if target_fitness and best_fitness_score >= target_fitness:
                 print(f"Target fitness reached. Stopping evolution.")
                 break
 
@@ -67,13 +111,17 @@ class GeneticAlgorithm:
 
             self.population = new_population
 
-            best_move = best_individual.get_best_move()
+            best_move_rank = best_individual.rank_move(best_move)
             self.history.append({
-                "best_fitness": best_fitness,
+                "best_fitness": best_fitness_score,
                 "best_move": best_move,
-                "weights": best_individual.get_weights()
+                "best_score": best_score,
+                "best_move_rank": best_move_rank
             })
-            print(f"Generation {generation + 1}, Best Fitness: {best_fitness}, Best Move: {best_move}")
+            self.weight_history.append(best_individual.get_weights())
+
+            print(f"\nGeneration {generation + 1}, Best Fitness: {best_fitness_score}, Best Move: {best_move} with rank: {best_move_rank}")
             print(f"Weights: {best_individual.get_weights()}\n")
 
+        self.weight_labels = best_individual.get_weight_labels()
         return best_individual

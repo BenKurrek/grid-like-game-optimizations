@@ -7,6 +7,9 @@ class BaseGame:
     
     def get_best_move(self):
         return self.game.get_best_move()
+
+    def rank_move(self, move):
+        return self.game.rank_move(move)
     
     def set_random_state(self):
         return self.game.set_random_state()
@@ -22,6 +25,9 @@ class BaseGame:
 
     def get_weights(self):
         return self.game.get_weights()
+    
+    def get_weight_labels(self):
+        return self.game.get_weight_labels()
 
     def visualize_best_move(self, size):
         best_move = self.game.get_best_move()

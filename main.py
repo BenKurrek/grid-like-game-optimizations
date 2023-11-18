@@ -26,7 +26,7 @@ def main():
     print(f"Selected Algorithm: {algorithm_name}")
 
     # Create a GeneticAlgorithm instance
-    genetic_algorithm = GeneticAlgorithm(game_name, population_size=10, mutation_rate=0.5)
+    genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.5)
 
     # Evolve the population for a certain number of generations
     best_individual = genetic_algorithm.evolve(generations=2000)
