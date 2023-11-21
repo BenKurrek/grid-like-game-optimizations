@@ -3,7 +3,7 @@ def create_base_game(game_name, game_meta):
         from src.game.chess.chess_game import ChessGame
         from src.game.base_game import BaseGame
         game = ChessGame(game_meta)
-        return BaseGame(game) # Pass the game_name argument
+        return game # Pass the game_name argument
     # elif self.game_name == "othello":
     #     self.game = Othello()  # Replace with actual Othello initialization
     # elif self.game_name == "go":
