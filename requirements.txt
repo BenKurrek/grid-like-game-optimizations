@@ -1,0 +1,6 @@
+Pillow
+configparser
+pycairo
+cairosvg
+matplotlib
+chess
