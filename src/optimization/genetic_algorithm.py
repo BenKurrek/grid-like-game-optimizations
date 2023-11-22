@@ -74,6 +74,36 @@ class GeneticAlgorithm:
         else:
             raise ValueError("Invalid game name. Supported options: chess, othello, go")
 
+    def mutate(self, game):
+        # Randomly choose 3 weights to mutate
+        weights = game.get_weights()
+        weight_bounds = game.get_weight_bounds()
+
+        print(f"Mutating weights: {weights}")
+
+        weight_indices = random.sample(range(len(weights)), 3)
+        for weight_idx in weight_indices:
+            weights[weight_idx] = random.uniform(float(weight_bounds[weight_idx][0]), float(weight_bounds[weight_idx][1]))
+        
+        print(f"Mutated weights.")
+        game.update_weights(weights)
+
+    def crossover(self, game1, game2):
+        child_weights = []
+        
+        weights1 = game1.get_weights()
+        weights2 = game2.get_weights()
+
+        for idx in range(len(weights1)):
+            # Randomly choose weights from either parent
+            child_weights.append(random.choice([weights1[idx], weights2[idx]]))
+
+        # Create a new ChessGame instance for the child
+        board_data = game1.get_board_data()
+        child_game = create_base_game(self.game_name, board_data)
+        child_game.update_weights(child_weights)
+        return child_game
+
     def evolve(self, generations, target_fitness=None):
         for generation in range(generations):
             fitness_scores = []
@@ -101,11 +131,11 @@ class GeneticAlgorithm:
             while len(new_population) < self.population_size:
                 # Randomly select two parents to reproduce
                 parent1, parent2 = random.sample(parents, 2)
-                child = parent1.crossover(parent2)
+                child = self.crossover(parent1, parent2)
                 
                 # Randomly mutate the child based on the mutation rate
                 if random.random() < self.mutation_rate:
-                    child.mutate()
+                    self.mutate(child)
 
                 new_population.append(child)
 
