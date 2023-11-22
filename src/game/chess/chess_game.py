@@ -18,7 +18,7 @@ weight_labels = [
     "King Safety Weight",
     "Control of Key Squares Weight"
 ]
-weight_upper_bounds = [
+weight_bounds = [
     # Material
     (0, 1000), # pawn
     (0, 1000), # knight
@@ -67,13 +67,19 @@ class ChessGame(BaseGame):
 
     # Random starting genes for the chromosome based on lower and upper bounds
     def initialize_random_weights(self):
-        self.weights = [random.uniform(float(lower), float(upper)) for lower, upper in weight_upper_bounds]
+        self.weights = [random.uniform(float(lower), float(upper)) for lower, upper in weight_bounds]
+
+    def get_board_data(self):
+        return [self.board, self.game_moves, self.move_sequences, self.ranked_moves]
 
     def rank_move(self, move):
         return (self.ranked_moves[str(move)], len(list(self.board.legal_moves)))
 
     def get_weights(self):
         return self.weights
+    
+    def get_weight_bounds(self):
+        return weight_bounds
     
     def get_weight_labels(self): 
         return weight_labels
@@ -186,25 +192,6 @@ class ChessGame(BaseGame):
 
         #print(f"TURN: {self.turn}, Chosen Move: {best_move} With Score: {best_score}\nGM Move: {self.gm_move} Stockfish Move: {self.stockfish_move}, With Stockfish Evaluation: {self.stockfish_score}\n\n")
         return (score / len(legal_moves), best_move, best_score)
-    
-    def mutate(self):
-        # Randomly choose 3 weights to mutate
-        weight_indices = random.sample(range(len(self.weights)), 3)
-        for weight_idx in weight_indices:
-            self.weights[weight_idx] = random.uniform(float(weight_upper_bounds[weight_idx][0]), float(weight_upper_bounds[weight_idx][1]))
-        
-        print(f"Mutated weights.")
-
-    def crossover(self, game2):
-        child_weights = []
-        for idx in range(len(self.weights)):
-            # Randomly choose weights from either parent
-            child_weights.append(random.choice([self.weights[idx], game2.get_weights()[idx]]))
-
-        # Create a new ChessGame instance for the child
-        child_game = ChessGame([self.board, self.game_moves, self.move_sequences, self.ranked_moves])
-        child_game.update_weights(child_weights)
-        return child_game
 
     def get_best_move(self):
         best_score = None
