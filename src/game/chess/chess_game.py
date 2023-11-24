@@ -58,7 +58,7 @@ class ChessGame(BaseGame):
     def get_weight_bounds(self):
         return queen_weight_bounds + rook_weight_bounds + knight_weight_bounds + bishop_weight_bounds + king_weight_bounds + pawn_weight_bounds
     
-    def get_weight_labels(self): 
+    def get_weight_labels(self):
         return queen_weight_labels + rook_weight_labels + knight_weight_labels + bishop_weight_labels + king_weight_labels + pawn_weight_labels
     
     def update_weights(self, weights):

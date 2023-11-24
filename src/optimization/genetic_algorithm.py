@@ -39,14 +39,15 @@ class GeneticAlgorithm:
         axes1[1].set_ylabel('Rank')
         axes1[1].set_ylim(1, max_moves)
 
-        # Figure 2: Weights
-        fig2, axes2 = plt.subplots(2, 3, figsize=(18, 12))  # 2 rows, 3 columns
+        # Figure 2: Weights ()
+        total_weights = len(weight_history[0])
+        # 3 columns per row
+        fig2, axes2 = plt.subplots(total_weights//3, 3)
         
         # Plotting weights
-        for i in range(5):
+        for i in range(total_weights):
             weights_values = [weights[i] for weights in weight_history]
             axes2[i//3, i%3].plot(generations, weights_values, marker='o')
-            axes2[i//3, i%3].axhline(y=default_vals[i], color='red', linestyle='--')  # Add red line at y=100
             axes2[i//3, i%3].set_title(f'{self.weight_labels[i]}')
             axes2[i//3, i%3].set_xlabel('Generation')
             axes2[i//3, i%3].set_ylabel(f'Weight')
