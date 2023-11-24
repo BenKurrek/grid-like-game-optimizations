@@ -1,19 +1,19 @@
-import chess
-import chess.pgn
-import chess.engine
-import random
-from tqdm import tqdm
 import time
+import random
+
+from tqdm import tqdm
+from chess import engine, pgn
 
 # Evaluate the score of every legal move (and get the next best move)
 def stockfish_evaluation(board):
     two_ply_moves = 1
 
-    engine = chess.engine.SimpleEngine.popen_uci("./stockfish")
+    myEngine = engine.SimpleEngine.popen_uci("./stockfish")
     move_sequences = {}
     total_moves = len(list(board.legal_moves))
+    
 
-    starting_info = engine.analyse(board, chess.engine.Limit(time=1))
+    starting_info = myEngine.analyse(board, engine.Limit(time=1))
     move_sequences['stockfish'] = {
         'score': starting_info['score'],
         'move': starting_info['pv'][0]
@@ -29,7 +29,7 @@ def stockfish_evaluation(board):
         time_to_find_moveset = 0.1
         
         while len(principle_moveset) < two_ply_moves * 2:
-            info = engine.analyse(board, chess.engine.Limit(time=0.1), root_moves=[move])
+            info = myEngine.analyse(board, engine.Limit(time=0.1), root_moves=[move])
             principle_moveset = info['pv']
             score = info['score']
             time_to_find_moveset += 0.1
@@ -44,7 +44,7 @@ def stockfish_evaluation(board):
         best_moves_ascending.append((move, score))
 
     print(f"Move Sequences: {move_sequences}")
-    engine.quit()
+    myEngine.quit()
 
     # Sort the moves by score
     best_moves_ascending.sort(key=lambda x: x[1].relative.score(mate_score=2000), reverse=board.turn)
@@ -64,7 +64,7 @@ def extract_random_chess_positions(num_positions):
     games = []
     with open('./src/utility/master_games.pgn') as file:
         while True:
-            game = chess.pgn.read_game(file)
+            game = pgn.read_game(file)
             if game is None:
                 break
             games.append(game)

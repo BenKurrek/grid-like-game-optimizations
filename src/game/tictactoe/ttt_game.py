@@ -1,6 +1,6 @@
 # src/game/chess.py
 import chess
-from chess import svg
+import chess.svg
 import random
 from src.game.base_game import BaseGame
 import json
@@ -49,7 +49,7 @@ piece_map = {
     'CONTROL_KEY_SQUARES_WEIGHT': 10,
 }
 
-class ChessGame(BaseGame):
+class tttGame(BaseGame):
     def __init__(self, meta):
         board, game_moves, move_sequences, ranked_moves = meta
 
@@ -211,12 +211,12 @@ class ChessGame(BaseGame):
 
     def visualize_best_move(self, img_size):
         best_move = self.get_best_move()
-        return svg.board(
+        return chess.svg.board(
             board=self.board, 
             arrows=[
-                svg.Arrow(best_move.from_square, best_move.to_square, color="#FF0000cc"),  # Red for our move
-                svg.Arrow(self.game_moves[0].from_square, self.game_moves[0].to_square, color="#00cc00cc"),  # Green for actual move
-                svg.Arrow(self.stockfish_move.from_square, self.stockfish_move.to_square, color="#0000ccFF")  # Blue for Stockfish move
+                chess.svg.Arrow(best_move.from_square, best_move.to_square, color="#FF0000cc"),  # Red for our move
+                chess.svg.Arrow(self.game_moves[0].from_square, self.game_moves[0].to_square, color="#00cc00cc"),  # Green for actual move
+                chess.svg.Arrow(self.stockfish_move.from_square, self.stockfish_move.to_square, color="#0000ccFF")  # Blue for Stockfish move
                 ],
             size=img_size
             )

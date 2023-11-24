@@ -11,6 +11,7 @@ from src.optimization.genetic_algorithm import GeneticAlgorithm
 def read_config(file_path="config.ini"):
     config = configparser.ConfigParser()
     config.read(file_path)
+    
     return config
 
 def main():

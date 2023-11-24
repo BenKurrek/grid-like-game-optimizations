@@ -67,8 +67,9 @@ class GeneticAlgorithm:
             board_data = extract_random_chess_positions(num_positions=1)[0]
             # Create the population given the set of initial individuals
             return [create_base_game(self.game_name, board_data) for _ in range(self.population_size)]
-        # elif self.game_name == "othello":
-        #     self.game = Othello( )  # Replace with actual Othello initialization
+        elif self.game_name == "tictactoe":
+            print("Tic Tac Toe")
+            # self.game = Othello( )  # Replace with actual Othello initialization
         # elif self.game_name == "go":
         #     self.game = Go()  # Replace with actual Go initialization
         else:

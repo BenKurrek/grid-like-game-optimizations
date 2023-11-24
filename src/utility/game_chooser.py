@@ -4,8 +4,10 @@ def create_base_game(game_name, game_meta):
         from src.game.base_game import BaseGame
         game = ChessGame(game_meta)
         return game # Pass the game_name argument
-    # elif self.game_name == "othello":
-    #     self.game = Othello()  # Replace with actual Othello initialization
+    elif game_name == "tictactoe":
+        from src.game.tictactoe.ttt_game import tttGame
+        game = tttGame(game_meta)
+        return game  # Replace with actual Othello initialization
     # elif self.game_name == "go":
     #     self.game = Go()  # Replace with actual Go initialization
     else:
