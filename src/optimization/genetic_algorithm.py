@@ -8,6 +8,7 @@ class GeneticAlgorithm:
         self.history = []  
         self.weight_history = []  
         self.weight_labels = []
+        self.weight_bounds = []
 
         self.game_name = game_name
         self.population_size = population_size
@@ -42,16 +43,17 @@ class GeneticAlgorithm:
         # Figure 2: Weights ()
         total_weights = len(weight_history[0])
         # 3 columns per row
-        fig2, axes2 = plt.subplots(total_weights//3, 3)
+        fig2, axes2 = plt.subplots(total_weights//3 + 1, 3)
         
         # Plotting weights
         for i in range(total_weights):
             weights_values = [weights[i] for weights in weight_history]
+
             axes2[i//3, i%3].plot(generations, weights_values, marker='o')
             axes2[i//3, i%3].set_title(f'{self.weight_labels[i]}')
             axes2[i//3, i%3].set_xlabel('Generation')
             axes2[i//3, i%3].set_ylabel(f'Weight')
-            axes2[i//3, i%3].set_ylim(0, 1000)  
+            axes2[i//3, i%3].set_ylim(self.weight_bounds[i][0], self.weight_bounds[i][1])  
 
         fig1.tight_layout()
         fig2.tight_layout()
@@ -152,4 +154,5 @@ class GeneticAlgorithm:
             print(f"Weights: {best_individual.get_weights()}\n")
 
         self.weight_labels = best_individual.get_weight_labels()
+        self.weight_bounds = best_individual.get_weight_bounds()
         return best_individual

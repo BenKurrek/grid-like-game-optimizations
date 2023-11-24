@@ -29,7 +29,7 @@ def main():
     genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.5)
 
     # Evolve the population for a certain number of generations
-    best_individual = genetic_algorithm.evolve(generations=10)
+    best_individual = genetic_algorithm.evolve(generations=200)
     genetic_algorithm.plot_evolution_history()
 
     svg_content = best_individual.visualize_best_move(img_size=400)

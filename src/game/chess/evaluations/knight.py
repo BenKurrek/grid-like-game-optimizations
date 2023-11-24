@@ -33,8 +33,19 @@ class KnightEvaluator:
 
         self.board = board
 
-    def evaluation_for_piece(self, square: chess.Square, piece: chess.Piece):
-        self.material_evaluation(piece)
+    def get_score(self):
+        white_score = 0
+        black_score = 0
+        for weight_index, (white_weight, black_weight) in enumerate(self.scores_for_weights):
+            white_score += white_weight
+            black_score += black_weight
+
+        return (white_score, black_score)
+
+    def evaluation_for_square(self, square, piece):
+        if piece.piece_type == chess.KNIGHT:
+            self.material_evaluation(piece)
+            self.position_evaluation(square, piece)
 
     def material_evaluation(self, piece: chess.Piece):
         if piece.piece_type == chess.KNIGHT:

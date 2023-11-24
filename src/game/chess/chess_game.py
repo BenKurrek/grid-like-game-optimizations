@@ -104,7 +104,7 @@ class ChessGame(BaseGame):
         white_score = queen_score[0] + rook_score[0] + knight_score[0] + bishop_score[0] + king_score[0] + pawn_score[0]
         black_score = queen_score[1] + rook_score[1] + knight_score[1] + bishop_score[1] + king_score[1] + pawn_score[1]
 
-        print(f"White Score: {white_score}, Black Score: {black_score}")
+        #print(f"White Score: {white_score}, Black Score: {black_score}")
         return white_score - black_score
 
     def evaluate_move(self, move):
