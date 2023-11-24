@@ -4,58 +4,14 @@ import chess.svg
 import random
 from src.game.base_game import BaseGame
 
-from src.game.chess.evaluations.queen import QueenEvaluator
-from src.game.chess.evaluations.rook import RookEvaluator
-from src.game.chess.evaluations.knight import KnightEvaluator
-from src.game.chess.evaluations.pawn import PawnEvaluator
-from src.game.chess.evaluations.bishop import BishopEvaluator
-from src.game.chess.evaluations.king import KingEvaluator
+from src.game.chess.evaluations.queen import QueenEvaluator, queen_weight_bounds, queen_weight_labels
+from src.game.chess.evaluations.rook import RookEvaluator, rook_weight_bounds, rook_weight_labels
+from src.game.chess.evaluations.knight import KnightEvaluator, knight_weight_bounds, knight_weight_labels
+from src.game.chess.evaluations.pawn import PawnEvaluator, pawn_weight_bounds, pawn_weight_labels
+from src.game.chess.evaluations.bishop import BishopEvaluator, bishop_weight_bounds, bishop_weight_labels
+from src.game.chess.evaluations.king import KingEvaluator, king_weight_bounds, king_weight_labels
 
 import json
-
-weight_labels = [
-    "Pawn Weight",
-    "Knight Weight",
-    "Bishop Weight",
-    "Rook Weight",
-    "Queen Weight",
-    "King Weight",
-    "Total Material Weight",
-    "Pawn Structure Weight",
-    "Piece Development Weight",
-    "King Safety Weight",
-    "Control of Key Squares Weight"
-]
-weight_bounds = [
-    # Material
-    (0, 1000), # pawn
-    (0, 1000), # knight
-    (0, 1000), # bishop    
-    (0, 1000), # rook
-    (0, 1000), # queen
-    (1, 1), # king
-
-    # Extra
-    (1, 1), # Total Material Weight
-    (0, 0), # pawn structure
-    (0, 0), # piece development
-    (0, 0), # king safety
-    (0, 0), # control of key squares
-]
-
-piece_map = {
-    'p': 0,
-    'n': 1,
-    'b': 2,
-    'r': 3,
-    'q': 4,
-    'k': 5,
-    'MATERIAL_WEIGHT': 6,
-    'PAWN_STRUCTURE_WEIGHT': 7,
-    'PIECE_DEVELOPMENT_WEIGHT': 8,
-    'KING_SAFETY_WEIGHT': 9,
-    'CONTROL_KEY_SQUARES_WEIGHT': 10,
-}
 
 class ChessGame(BaseGame):
     def __init__(self, meta):
@@ -75,7 +31,14 @@ class ChessGame(BaseGame):
 
     # Random starting genes for the chromosome based on lower and upper bounds
     def initialize_random_weights(self):
-        self.weights = [random.uniform(float(lower), float(upper)) for lower, upper in weight_bounds]
+        self.weights = [
+            [random.uniform(float(lower), float(upper)) for lower, upper in queen_weight_bounds],
+            [random.uniform(float(lower), float(upper)) for lower, upper in rook_weight_bounds],
+            [random.uniform(float(lower), float(upper)) for lower, upper in knight_weight_bounds],
+            [random.uniform(float(lower), float(upper)) for lower, upper in bishop_weight_bounds],
+            [random.uniform(float(lower), float(upper)) for lower, upper in king_weight_bounds],
+            [random.uniform(float(lower), float(upper)) for lower, upper in pawn_weight_bounds],
+        ]
 
     def get_board_data(self):
         return [self.board, self.game_moves, self.move_sequences, self.ranked_moves]
@@ -84,56 +47,75 @@ class ChessGame(BaseGame):
         return (self.ranked_moves[str(move)], len(list(self.board.legal_moves)))
 
     def get_weights(self):
-        return self.weights
+        # concatenate all the weights into a single list
+        concatenated_weights = []
+        for sublist in self.weights:
+            concatenated_weights.extend(sublist)
+
+        return concatenated_weights
+
     
     def get_weight_bounds(self):
-        return weight_bounds
+        return queen_weight_bounds + rook_weight_bounds + knight_weight_bounds + bishop_weight_bounds + king_weight_bounds + pawn_weight_bounds
     
     def get_weight_labels(self): 
-        return weight_labels
+        return queen_weight_labels + rook_weight_labels + knight_weight_labels + bishop_weight_labels + king_weight_labels + pawn_weight_labels
     
     def update_weights(self, weights):
-        self.weights = weights
+        queen_weights = weights[:len(queen_weight_bounds)]
+        rook_weights = weights[len(queen_weight_bounds):len(queen_weight_bounds) + len(rook_weight_bounds)]
+        knight_weights = weights[len(queen_weight_bounds) + len(rook_weight_bounds):len(queen_weight_bounds) + len(rook_weight_bounds) + len(knight_weight_bounds)]
+        bishop_weights = weights[len(queen_weight_bounds) + len(rook_weight_bounds) + len(knight_weight_bounds):len(queen_weight_bounds) + len(rook_weight_bounds) + len(knight_weight_bounds) + len(bishop_weight_bounds)]
+        king_weights = weights[len(queen_weight_bounds) + len(rook_weight_bounds) + len(knight_weight_bounds) + len(bishop_weight_bounds):len(queen_weight_bounds) + len(rook_weight_bounds) + len(knight_weight_bounds) + len(bishop_weight_bounds) + len(king_weight_bounds)]
+        pawn_weights = weights[len(queen_weight_bounds) + len(rook_weight_bounds) + len(knight_weight_bounds) + len(bishop_weight_bounds) + len(king_weight_bounds):]
+
+        self.weights = [queen_weights, rook_weights, knight_weights, bishop_weights, king_weights, pawn_weights]
     
     def evaluate_board_state(self, board):
         score = 0
 
         # Instantiate the evaluators and update their scores for each square in the board
         # At the end, the score will be the sum of all the evaluations
-        queen_evaluator = QueenEvaluator(board)
-        rook_evaluator = RookEvaluator(board)
-        knight_evaluator = KnightEvaluator(board)
-        bishop_evaluator = BishopEvaluator(board)
-        king_evaluator = KingEvaluator(board)
+        queen_evaluator = QueenEvaluator(board, self.weights[0])
+        rook_evaluator = RookEvaluator(board, self.weights[1])
+        knight_evaluator = KnightEvaluator(board, self.weights[2])
+        bishop_evaluator = BishopEvaluator(board, self.weights[3])
+        king_evaluator = KingEvaluator(board, self.weights[4])
+        pawn_evaluator = PawnEvaluator(board, self.weights[5])
 
-        for square in board.squares():
-            queen_evaluator.evaluation_for_piece(square)
-            rook_evaluator.evaluation_for_piece(square)
-            knight_evaluator.evaluation_for_piece(square)
-            bishop_evaluator.evaluation_for_piece(square)
-            king_evaluator.evaluation_for_piece(square)
+        for square in chess.SQUARES:
+            piece = board.piece_at(square)
+            if piece:
+                queen_evaluator.evaluation_for_square(square, piece)
+                rook_evaluator.evaluation_for_square(square, piece)
+                knight_evaluator.evaluation_for_square(square, piece)
+                bishop_evaluator.evaluation_for_square(square, piece)
+                king_evaluator.evaluation_for_square(square, piece)
+                pawn_evaluator.evaluation_for_square(square, piece)
+
+        # Add the scores for each evaluator to the total score
+        queen_score = queen_evaluator.get_score()
+        rook_score = rook_evaluator.get_score()
+        knight_score = knight_evaluator.get_score()
+        bishop_score = bishop_evaluator.get_score()
+        king_score = king_evaluator.get_score()
+        pawn_score = pawn_evaluator.get_score()
+
+        white_score = queen_score[0] + rook_score[0] + knight_score[0] + bishop_score[0] + king_score[0] + pawn_score[0]
+        black_score = queen_score[1] + rook_score[1] + knight_score[1] + bishop_score[1] + king_score[1] + pawn_score[1]
+
+        print(f"White Score: {white_score}, Black Score: {black_score}")
+        return white_score - black_score
 
     def evaluate_move(self, move):
         new_board = self.board.copy()
-        initial_score = (
-            self.material_evaluation(new_board)
-            # self.pawn_structure_evaluation(new_board) +
-            # self.piece_development_evaluation(new_board) +
-            # self.king_safety_evaluation(new_board) +
-            # self.control_key_squares_evaluation(new_board)
-        )
+        initial_score = self.evaluate_board_state(new_board)
 
         # Push the desired moves and then also the move that stockfish would make in retaliation
         for next_move in self.move_sequences[str(move)]['next_moves']:
             new_board.push(chess.Move.from_uci(next_move.uci()))
     
-        final_score = (
-            self.material_evaluation(new_board)
-            # self.pawn_structure_evaluation(new_board) +
-            # self.piece_development_evaluation(new_board) +
-            # self.king_safety_evaluation(new_board) +
-            # self.control_key_squares_evaluation(new_board)
-        )
+        final_score = self.evaluate_board_state(new_board)
         
         # DEBUGGING
         #if move == self.stockfish_move:
@@ -144,38 +126,6 @@ class ChessGame(BaseGame):
         #print(f"Turn: {self.turn}, Move: {move.uci()} Initial Score: {initial_score}, Final Score: {final_score}, Difference: {final_score - initial_score}\n")
 
         return final_score - initial_score
-    
-    def material_evaluation(self, board):
-        white_material = 0
-        black_material = 0
-        for piece in board.piece_map():
-            if board.piece_at(piece).color == chess.WHITE:
-                white_material += self.weights[piece_map[board.piece_at(piece).symbol().lower()]]
-            else:
-                black_material += self.weights[piece_map[board.piece_at(piece).symbol().lower()]]
-        evaluation = self.weights[piece_map['MATERIAL_WEIGHT']] * (white_material - black_material)
-        return evaluation
-
-    def pawn_structure_evaluation(self, board):
-        white_pawn_structure = sum(1 for square in chess.SQUARES if board.piece_at(square) == chess.Piece(chess.PAWN, chess.WHITE))
-        black_pawn_structure = sum(1 for square in chess.SQUARES if board.piece_at(square) == chess.Piece(chess.PAWN, chess.BLACK))
-        return self.weights['PAWN_STRUCTURE_WEIGHT'] * (white_pawn_structure - black_pawn_structure)
-
-    def piece_development_evaluation(self, board):
-        white_piece_development = sum(1 for square in chess.SQUARES if board.piece_at(square) and board.piece_at(square).color == chess.WHITE and square not in chess.BB_RANKS)
-        black_piece_development = sum(1 for square in chess.SQUARES if board.piece_at(square) and board.piece_at(square).color == chess.BLACK and square not in chess.BB_RANKS)
-        return self.weights['PIECE_DEVELOPMENT_WEIGHT'] * (white_piece_development - black_piece_development)
-
-    def king_safety_evaluation(self, board):
-        white_king_safety = sum(1 for square in chess.SQUARES if board.is_attacked_by(chess.BLACK, square))
-        black_king_safety = sum(1 for square in chess.SQUARES if board.is_attacked_by(chess.WHITE, square))
-        return self.weights['KING_SAFETY_WEIGHT'] * (white_king_safety - black_king_safety)
-
-    def control_key_squares_evaluation(self, board):
-        key_squares = ['e4', 'd4', 'c4', 'e5', 'd5', 'c5']
-        white_control_key_squares = sum(1 for square in key_squares if board.color_at(chess.parse_square(square)) == chess.WHITE)
-        black_control_key_squares = sum(1 for square in key_squares if board.color_at(chess.parse_square(square)) == chess.BLACK)
-        return self.weights['CONTROL_KEY_SQUARES_WEIGHT'] * (white_control_key_squares - black_control_key_squares)
     
     # Fitness is defined as the average difference between the actual stockfish score and the evaluated score
     def fitness(self):
