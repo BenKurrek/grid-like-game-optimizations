@@ -3,6 +3,14 @@ import chess
 import chess.svg
 import random
 from src.game.base_game import BaseGame
+
+from src.game.chess.evaluations.queen import QueenEvaluator
+from src.game.chess.evaluations.rook import RookEvaluator
+from src.game.chess.evaluations.knight import KnightEvaluator
+from src.game.chess.evaluations.pawn import PawnEvaluator
+from src.game.chess.evaluations.bishop import BishopEvaluator
+from src.game.chess.evaluations.king import KingEvaluator
+
 import json
 
 weight_labels = [
@@ -87,6 +95,24 @@ class ChessGame(BaseGame):
     def update_weights(self, weights):
         self.weights = weights
     
+    def evaluate_board_state(self, board):
+        score = 0
+
+        # Instantiate the evaluators and update their scores for each square in the board
+        # At the end, the score will be the sum of all the evaluations
+        queen_evaluator = QueenEvaluator()
+        rook_evaluator = RookEvaluator()
+        knight_evaluator = KnightEvaluator()
+        bishop_evaluator = BishopEvaluator()
+        king_evaluator = KingEvaluator()
+
+        for square in board.squares():
+            queen_evaluator.evaluation_for_piece(board, square)
+            rook_evaluator.evaluation_for_piece(board, square)
+            knight_evaluator.evaluation_for_piece(board, square)
+            bishop_evaluator.evaluation_for_piece(board, square)
+            king_evaluator.evaluation_for_piece(board, square)
+
     def evaluate_move(self, move):
         new_board = self.board.copy()
         initial_score = (
@@ -120,21 +146,13 @@ class ChessGame(BaseGame):
         return final_score - initial_score
     
     def material_evaluation(self, board):
-        # board_pieces = {
-        #     # P, N, B, R, Q, K
-        #     'WHITE': [0, 0, 0, 0, 0, 0],
-        #     'BLACK': [0, 0, 0, 0, 0, 0]
-        # }
-
-        # for piece in board.piece_map().values():
-        #     color = 'WHITE' if piece.color == chess.WHITE else 'BLACK'
-        #     board_pieces[color][piece_map[piece.symbol().lower()]] += 1
-
-        # # Print JSON Stringified Board Pieces
-        # print(f"Board Pieces: {json.dumps(board_pieces)}")
-
-        white_material = sum(self.weights[piece_map[piece.symbol().lower()]] for piece in board.piece_map().values() if piece.color == chess.WHITE)
-        black_material = sum(self.weights[piece_map[piece.symbol().lower()]] for piece in board.piece_map().values() if piece.color == chess.BLACK)
+        white_material = 0
+        black_material = 0
+        for piece in board.piece_map():
+            if board.piece_at(piece).color == chess.WHITE:
+                white_material += self.weights[piece_map[board.piece_at(piece).symbol().lower()]]
+            else:
+                black_material += self.weights[piece_map[board.piece_at(piece).symbol().lower()]]
         evaluation = self.weights[piece_map['MATERIAL_WEIGHT']] * (white_material - black_material)
         return evaluation
 

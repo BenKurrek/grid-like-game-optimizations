@@ -23,7 +23,6 @@ class GeneticAlgorithm:
 
         # Figure 1: Best Fitness and Best Move Rank
         fig1, axes1 = plt.subplots(1, 2, figsize=(18, 6))  # 1 row, 2 columns
-
         # Plotting best fitness values
         axes1[0].plot(generations, best_fitness_values, marker='o')
         axes1[0].set_title('Best Fitness')
@@ -42,8 +41,6 @@ class GeneticAlgorithm:
 
         # Figure 2: Weights
         fig2, axes2 = plt.subplots(2, 3, figsize=(18, 12))  # 2 rows, 3 columns
-
-        default_vals = [100, 300, 300, 500, 900]
         
         # Plotting weights
         for i in range(5):

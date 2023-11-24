@@ -3,15 +3,35 @@
 import chess
 from chess import Square, Piece
 
+weight_labels = [
+    "Pawn Material Weight",
+    "Pawn Islands Weight",
+    "Pawn Chains Weight",
+    "Passed Pawns Weight"
+]
+weight_bounds = [
+    # Material
+    (0, 1000), # how much the pawn is worth
+    (0, 1000), # how much pawn islands are worth
+    (0, 1000), # how much pawn chains are worth
+    (0, 1000), # how much passed pawns are worth
+]
+
 class PawnEvaluator:
     def __init__(self):
-        # Initialize your class variables, including self.weights and piece_map
-        self.weights = {
-            'PAWN_STRUCTURE_WEIGHT': 0.5,
-            'PAWN_ISLANDS_WEIGHT': 0.2,
-            'PAWN_CHAINS_WEIGHT': 0.3,
-            'PAWN_WEAKNESS_WEIGHT': 0.4,
-        }
+        self.weights = [random.uniform(float(lower), float(upper)) for lower, upper in weight_bounds]
+        # (W, B) scores for each weight
+        self.scores_for_weights = [(0, 0) for _ in range(len(weight_bounds))]
+
+    def evaluation_for_piece(self, pice):
+        self.material_evaluation(piece)
+
+    def material_evaluation(self, piece):
+        if piece.piece_type == chess.PAWN:
+            if piece.color == chess.WHITE:
+                self.scores_for_weights[0][0] += self.weights[0]
+            else:
+                self.scores_for_weights[0][1] += self.weights[0]
 
     def pawn_structure_evaluation(self, board):
         white_pawn_structure = self.calculate_pawn_structure(board, chess.WHITE)
@@ -25,12 +45,7 @@ class PawnEvaluator:
         )
 
         return pawn_structure_score
-
-    def calculate_pawn_structure(self, board, color):
-        # Count the number of pawns for the given color
-        pawns = [square for square in chess.SQUARES if board.piece_at(square) == chess.Piece(chess.PAWN, color)]
-        return len(pawns)
-
+        
     def calculate_pawn_islands(self, board):
         # Count the number of pawn islands
         pawn_islands = 0
