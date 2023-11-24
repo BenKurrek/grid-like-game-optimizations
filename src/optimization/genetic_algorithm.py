@@ -1,5 +1,6 @@
 import random
 from src.utility.chess_extraction import extract_random_chess_positions
+from src.utility.othello_extraction import extract_random_othello_positions
 from src.utility.game_chooser import create_base_game
 import matplotlib.pyplot as plt
 
@@ -67,8 +68,9 @@ class GeneticAlgorithm:
             board_data = extract_random_chess_positions(num_positions=1)[0]
             # Create the population given the set of initial individuals
             return [create_base_game(self.game_name, board_data) for _ in range(self.population_size)]
-        # elif self.game_name == "othello":
-        #     self.game = Othello( )  # Replace with actual Othello initialization
+        elif self.game_name == "othello":
+            board_data = extract_random_othello_positions(num_positions=1)[0]
+            return [create_base_game(self.game_name, board_data) for _ in range(self.population_size)]
         # elif self.game_name == "go":
         #     self.game = Go()  # Replace with actual Go initialization
         else:
