@@ -18,12 +18,15 @@ weight_bounds = [
 ]
 
 class PawnEvaluator:
-    def __init__(self):
+    def __init__(self, board):
         self.weights = [random.uniform(float(lower), float(upper)) for lower, upper in weight_bounds]
         # (W, B) scores for each weight
         self.scores_for_weights = [(0, 0) for _ in range(len(weight_bounds))]
 
-    def evaluation_for_piece(self, pice):
+        self.pawn_islands = 0
+        self.seen_files = set()
+
+    def evaluation_for_piece(self, piece):
         self.material_evaluation(piece)
 
     def material_evaluation(self, piece):
@@ -45,7 +48,7 @@ class PawnEvaluator:
         )
 
         return pawn_structure_score
-        
+
     def calculate_pawn_islands(self, board):
         # Count the number of pawn islands
         pawn_islands = 0
@@ -53,11 +56,7 @@ class PawnEvaluator:
 
         for square in chess.SQUARES:
             piece = board.piece_at(square)
-            if piece and piece.piece_type == chess.PAWN:
-                file = chess.square_file(square)
-                if file not in seen_files:
-                    pawn_islands += 1
-                    seen_files.add(file)
+            
 
         return pawn_islands
 

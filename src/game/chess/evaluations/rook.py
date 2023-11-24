@@ -10,12 +10,12 @@ weight_bounds = [
 ]
 
 class RookEvaluator:
-    def __init__(self):
+    def __init__(self, board):
         self.weights = [random.uniform(float(lower), float(upper)) for lower, upper in weight_bounds]
         # (W, B) scores for each weight
         self.scores_for_weights = [(0, 0) for _ in range(len(weight_bounds))]
 
-    def evaluation_for_piece(self, pice):
+    def evaluation_for_piece(self, piece):
         self.material_evaluation(piece)
 
     def material_evaluation(self, piece):

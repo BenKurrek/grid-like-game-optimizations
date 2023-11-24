@@ -100,18 +100,18 @@ class ChessGame(BaseGame):
 
         # Instantiate the evaluators and update their scores for each square in the board
         # At the end, the score will be the sum of all the evaluations
-        queen_evaluator = QueenEvaluator()
-        rook_evaluator = RookEvaluator()
-        knight_evaluator = KnightEvaluator()
-        bishop_evaluator = BishopEvaluator()
-        king_evaluator = KingEvaluator()
+        queen_evaluator = QueenEvaluator(board)
+        rook_evaluator = RookEvaluator(board)
+        knight_evaluator = KnightEvaluator(board)
+        bishop_evaluator = BishopEvaluator(board)
+        king_evaluator = KingEvaluator(board)
 
         for square in board.squares():
-            queen_evaluator.evaluation_for_piece(board, square)
-            rook_evaluator.evaluation_for_piece(board, square)
-            knight_evaluator.evaluation_for_piece(board, square)
-            bishop_evaluator.evaluation_for_piece(board, square)
-            king_evaluator.evaluation_for_piece(board, square)
+            queen_evaluator.evaluation_for_piece(square)
+            rook_evaluator.evaluation_for_piece(square)
+            knight_evaluator.evaluation_for_piece(square)
+            bishop_evaluator.evaluation_for_piece(square)
+            king_evaluator.evaluation_for_piece(square)
 
     def evaluate_move(self, move):
         new_board = self.board.copy()
