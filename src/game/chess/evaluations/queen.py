@@ -5,7 +5,8 @@ from chess import Square, Piece
 queen_weight_labels = [
     "Queen Material Weight",
     "Queen Attacking Weight",
-    "Queen Defending Weight"
+    "Queen Defending Weight",
+    "Queen number of free spaces",
 ]
 queen_weight_bounds = [
     # Material
@@ -13,6 +14,8 @@ queen_weight_bounds = [
      # Attacking
     (0, 1000),
     # Defending
+    (0, 1000),
+    # Free spaces
     (0, 1000),
 ]
 
@@ -31,16 +34,18 @@ class QueenEvaluator:
         return self.scores_for_weights
 
     def evaluation_for_square(self, square, piece):
+        queen_attack_squares = [chess.square_name(square) for square in list(self.board.attacks(square))]
         if piece.piece_type == chess.QUEEN:
             self.material_evaluation(piece)
-            self.king_attacking_defending_evalutation(square, piece)
+            self.king_attacking_defending_evalutation(queen_attack_squares, square, piece)
+            self.free_squares_evaluation(queen_attack_squares, piece)
 
     def material_evaluation(self, piece):
         queen_material_idx = 0
         score_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
         self.scores_for_weights[queen_material_idx][score_idx] += 1
             
-    def king_attacking_defending_evalutation(self, square: chess.Square, piece: chess.Piece):
+    def king_attacking_defending_evalutation(self, queen_attack_squares, square: chess.Square, piece: chess.Piece):
         attacking_pawn_idx = 1
         defending_pawn_idx = 2
         
@@ -48,7 +53,6 @@ class QueenEvaluator:
         defending_king_squares = self.adjacent_white_king_squares if piece.color == chess.WHITE else self.adjacent_black_king_squares
         
         score_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
-        queen_attack_squares = [chess.square_name(square) for square in list(self.board.attacks(square))]
         
         for queen_attack_square in queen_attack_squares:
             # Attacking
@@ -58,3 +62,8 @@ class QueenEvaluator:
             # Defending   
             if queen_attack_square in defending_king_squares:
                 self.scores_for_weights[defending_pawn_idx][score_idx] += 1
+     
+    def free_squares_evaluation(self, queen_attack_squares, piece: chess.Piece):
+        free_square_idx = 3
+        score_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
+        self.scores_for_weights[free_square_idx][score_idx] = len(queen_attack_squares)

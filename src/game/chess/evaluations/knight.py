@@ -7,7 +7,8 @@ knight_weight_labels = [
     "Knight Material Weight",
     "Knight Position Weight",
     "Knight Attacking Weight",
-    "Knight Defending Weight"
+    "Knight Defending Weight",
+    "Knight number of free spaces",
 ]
 knight_weight_bounds = [
     # Material
@@ -17,6 +18,8 @@ knight_weight_bounds = [
     # Attacking
     (0, 1000),
     # Defending
+    (0, 1000),
+    # Free spaces
     (0, 1000),
 ]
 
@@ -58,10 +61,12 @@ class KnightEvaluator:
         return self.scores_for_weights
 
     def evaluation_for_square(self, square, piece):
+        knight_attack_squares = [chess.square_name(square) for square in list(self.board.attacks(square))]
         if piece.piece_type == chess.KNIGHT:
             self.material_evaluation(piece)
             self.position_evaluation(square, piece)
-            self.king_attacking_defending_evalutation(square, piece)
+            self.king_attacking_defending_evalutation(knight_attack_squares, piece)
+            self.free_squares_evaluation(knight_attack_squares, piece)
 
     def material_evaluation(self, piece: chess.Piece):
         knight_material_idx = 0
@@ -79,22 +84,26 @@ class KnightEvaluator:
                 square_value = BLACK_POSITION_MAPPING[square_name]
                 self.scores_for_weights[1][1] += square_value
                 
-    def king_attacking_defending_evalutation(self, square: chess.Square, piece: chess.Piece):
-        attacking_pawn_idx = 2
-        defending_pawn_idx = 3
+    def king_attacking_defending_evalutation(self, knight_attack_squares, piece: chess.Piece):
+        attacking_knight_idx = 2
+        defending_knight_idx = 3
         
         attacking_king_squares = self.adjacent_white_king_squares if piece.color == chess.BLACK else self.adjacent_black_king_squares
         defending_king_squares = self.adjacent_white_king_squares if piece.color == chess.WHITE else self.adjacent_black_king_squares
         
         score_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
-        knight_attack_squares = [chess.square_name(square) for square in list(self.board.attacks(square))]
         
         for knight_attack_square in knight_attack_squares:
             # Attacking
             if knight_attack_square in attacking_king_squares:
-                self.scores_for_weights[attacking_pawn_idx][score_idx] += 1
+                self.scores_for_weights[attacking_knight_idx][score_idx] += 1
             
             # Defending   
             if knight_attack_square in defending_king_squares:
-                self.scores_for_weights[defending_pawn_idx][score_idx] += 1
+                self.scores_for_weights[defending_knight_idx][score_idx] += 1
+                
+    def free_squares_evaluation(self, knight_attack_squares, piece: chess.Piece):
+        free_square_idx = 4
+        score_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
+        self.scores_for_weights[free_square_idx][score_idx] = len(knight_attack_squares)
                 

@@ -6,7 +6,7 @@ rook_weight_labels = [
     "Rook Material Weight",
     "Rook Attacking Weight",
     "Rook Defending Weight",
-    "Number of free spaces",
+    "Rook number of free spaces",
 ]
 rook_weight_bounds = [
     # Material
@@ -15,7 +15,7 @@ rook_weight_bounds = [
     (0, 1000),
     # Defending
     (0, 1000),
-    # Attack Squares
+    # Free spaces
     (0, 1000),
 ]
 
