@@ -30,7 +30,7 @@ class GeneticAlgorithm:
         axes1[0].set_xlabel('Generation')
         axes1[0].set_ylabel('Fitness')
 
-        # Plotting best move rank overtime
+        # Plotting best move rank over time
         best_move_rank_values = [entry["best_move_rank"][0] for entry in history]
         max_moves = history[0]["best_move_rank"][1]
 
@@ -40,24 +40,34 @@ class GeneticAlgorithm:
         axes1[1].set_ylabel('Rank')
         axes1[1].set_ylim(1, max_moves)
 
-        # Figure 2: Weights ()
+        # Figure 2: Weights
         total_weights = len(weight_history[0])
-        # 3 columns per row
-        fig2, axes2 = plt.subplots(total_weights//3 + 1, 3)
-        
-        # Plotting weights
-        for i in range(total_weights):
-            weights_values = [weights[i] for weights in weight_history]
+        rows_per_figure = 3
+        columns_per_figure = 3
+        num_figures = (total_weights - 1) // (rows_per_figure * columns_per_figure) + 1
 
-            axes2[i//3, i%3].plot(generations, weights_values, marker='o')
-            axes2[i//3, i%3].set_title(f'{self.weight_labels[i]}')
-            axes2[i//3, i%3].set_xlabel('Generation')
-            axes2[i//3, i%3].set_ylabel(f'Weight')
-            axes2[i//3, i%3].set_ylim(self.weight_bounds[i][0], self.weight_bounds[i][1])  
+        for figure_num in range(num_figures):
+            fig, axes = plt.subplots(rows_per_figure, columns_per_figure, figsize=(18, 6))
+            start_index = figure_num * rows_per_figure * columns_per_figure
+            end_index = min((figure_num + 1) * rows_per_figure * columns_per_figure, total_weights)
+
+            # Plotting weights
+            for i in range(start_index, end_index):
+                weights_values = [weights[i] for weights in weight_history]
+
+                row_index = (i - start_index) // columns_per_figure
+                col_index = (i - start_index) % columns_per_figure
+
+                axes[row_index, col_index].plot(generations, weights_values, marker='o')
+                axes[row_index, col_index].set_title(f'{self.weight_labels[i]}')
+                axes[row_index, col_index].set_xlabel('Generation')
+                axes[row_index, col_index].set_ylabel(f'Weight')
+                axes[row_index, col_index].set_ylim(self.weight_bounds[i][0], self.weight_bounds[i][1])
+
+            fig.tight_layout()
+            plt.show()
 
         fig1.tight_layout()
-        fig2.tight_layout()
-
         plt.show()
 
     def initialize_population(self):
