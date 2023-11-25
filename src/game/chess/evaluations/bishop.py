@@ -43,8 +43,8 @@ class BishopEvaluator:
             self.scores_for_weights[0][1] += 1
     
     def king_attacking_defending_evalutation(self, square: chess.Square, piece: chess.Piece):
-        attacking_pawn_idx = 1
-        defending_pawn_idx = 2
+        attacking_bishop_idx = 1
+        defending_bishop_idx = 2
         
         attacking_king_squares = self.adjacent_white_king_squares if piece.color == chess.BLACK else self.adjacent_black_king_squares
         defending_king_squares = self.adjacent_white_king_squares if piece.color == chess.WHITE else self.adjacent_black_king_squares
@@ -55,8 +55,8 @@ class BishopEvaluator:
         for bishop_attack_square in bishop_attack_squares:
             # Attacking
             if bishop_attack_square in attacking_king_squares:
-                self.scores_for_weights[attacking_pawn_idx][score_idx] += 1
+                self.scores_for_weights[attacking_bishop_idx][score_idx] += 1
             
             # Defending   
             if bishop_attack_square in defending_king_squares:
-                self.scores_for_weights[defending_pawn_idx][score_idx] += 1
+                self.scores_for_weights[defending_bishop_idx][score_idx] += 1
