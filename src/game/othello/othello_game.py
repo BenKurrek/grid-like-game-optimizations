@@ -1,5 +1,6 @@
 from src.game.base_game import BaseGame
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -7,8 +8,8 @@ class OthelloGame(BaseGame):
     BOARD_SIZE = 8
 
     # Bounds for the weights
-    WEIGHTS_MIN = -10
-    WEIGHTS_MAX = +10
+    WEIGHTS_MIN = -1000
+    WEIGHTS_MAX = +1000
 
     # Board pieces
     EMPTY = +0
@@ -49,16 +50,20 @@ class OthelloGame(BaseGame):
         best_move = self.valid_moves[np.argmax(move_scores)]
         return best_move
 
-    def rank_move(self, move):
+    def rank_move(self, move) -> tuple[int, int]:
         move_scores = [
-            self.evaluate_board(
+            self.reference_score(
                 self.make_move(self.board, self.player, move), self.player
             )
             for move in self.valid_moves
         ]
-        valid_moves, move_scores = zip(*sorted(zip(self.valid_moves, move_scores)))
+        valid_moves, move_scores = zip(
+            *sorted(
+                zip(self.valid_moves, move_scores), reverse=True, key=lambda x: x[1]
+            )
+        )
         index = valid_moves.index(move)
-        return index
+        return (index, len(valid_moves))
 
     def fitness(self) -> tuple[float, tuple[int, int], float]:
         score = 0
@@ -75,21 +80,41 @@ class OthelloGame(BaseGame):
                 best_score = new_score
                 best_move = move
             score += abs(new_score - ref_score)
-        return (score/len(valid_moves), best_move, best_score)
+        return (score / len(valid_moves), best_move, best_score)
 
     def get_weights(self) -> np.ndarray:
         return self.weights.flatten()
 
     def get_weight_bounds(self) -> list[tuple[int, int]]:
-        return [(self.WEIGHTS_MIN, self.WEIGHTS_MAX) for _ in range(self.BOARD_SIZE ** 2)]
+        return [
+            (self.WEIGHTS_MIN, self.WEIGHTS_MAX) for _ in range(self.BOARD_SIZE**2)
+        ]
 
     def get_weight_labels(self):
         letters = "ABCDEFGH"
         numbers = "12345678"
-        return [f'{i}{j}' for i in numbers for j in letters]
+        return [f"{i}{j}" for i in numbers for j in letters]
 
-    def visualize_best_move(self, size):
-        best_move = self.get_best_move()
+    def visualize_best_move(self, img_size):
+        our_best_move = self.get_best_move()
+        ref_moves = [self.rank_move(move) for move in self.valid_moves]
+        ref_best_move = min(zip(ref_moves, self.valid_moves), key=lambda x: x[0][0])[1]
+        black_x, black_y = np.where(self.board == self.BLACK) 
+        white_x, white_y = np.where(self.board == self.WHITE)
+        plt.figure(figsize=(8,8))
+        plt.gca().set_facecolor('green')
+        plt.scatter(black_x+0.5, black_y+0.5, c='black', s=1000, marker='o')
+        plt.scatter(white_x+0.5, white_y+0.5, c='white', s=1000, marker='o')
+        plt.scatter(our_best_move[0]+0.5, our_best_move[1]+0.5, c='red', s=1000, marker='o')
+        plt.scatter(ref_best_move[0]+0.5, ref_best_move[1]+0.5, c='blue', s=1000, marker='o')
+        plt.grid(axis='x', color='k')
+        plt.grid(axis='y', color='k')
+        plt.xlim(0, 8)
+        plt.ylim(0, 8)
+        plt.title(f"Othello Game\n"
+                  f"Our Best Move (red): {our_best_move}\n"
+                  f"Reference Best Move (blue): {ref_best_move}", loc='left')
+        plt.show()
         return
 
     def is_valid_move(
@@ -112,7 +137,7 @@ class OthelloGame(BaseGame):
             return False
 
         # Check if there is an opponent's piece adjacent to the move
-        if self.board[r, c] != opponent:
+        if board[r, c] != opponent:
             return False
 
         # Continue in the direction until an empty space or the player's piece is found
@@ -157,10 +182,11 @@ class OthelloGame(BaseGame):
         """
         Make a move on the board by flipping the opponent's pieces in the directions of the player's pieces.
         """
+        board_copy = board.copy()
         if isinstance(move, str):
             move = (int(move[1]) - 1, ord(move[0]) - ord("A"))
         opponent = -player
-        board[move] = player
+        board_copy[move] = player
         directions = [
             (-1, +0),
             (+1, +0),
@@ -172,13 +198,13 @@ class OthelloGame(BaseGame):
             (+1, +1),
         ]
         for direction in directions:
-            if self.is_valid_move(board, player, move, direction):
+            if self.is_valid_move(board_copy, player, move, direction):
                 r, c = move
                 r, c = r + direction[0], c + direction[1]
-                while board[r, c] == opponent:
-                    board[r, c] = player
+                while board_copy[r, c] == opponent:
+                    board_copy[r, c] = player
                     r, c = r + direction[0], c + direction[1]
-        return board
+        return board_copy
 
     def evaluate_board(self, board: np.ndarray, player: int) -> float:
         return np.sum(board * self.weights * player)
