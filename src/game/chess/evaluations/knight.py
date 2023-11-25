@@ -12,15 +12,15 @@ knight_weight_labels = [
 ]
 knight_weight_bounds = [
     # Material
-    (0, 1000), # how much the knight is worth
+    (200, 400), # how much the knight is worth
     # Position
     (0, 100), # how much the knoght position is worth
     # Attacking
-    (0, 1000),
+    (0, 75),
     # Defending
-    (0, 1000),
+    (0, 75),
     # Free spaces
-    (0, 1000),
+    (0, 100),
 ]
 
 WHITE_SCORE_IDX = 0

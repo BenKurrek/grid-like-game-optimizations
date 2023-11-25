@@ -10,7 +10,7 @@ rook_weight_labels = [
 ]
 rook_weight_bounds = [
     # Material
-    (0, 1000), # how much the rook is worth
+    (400, 600), # how much the rook is worth
      # Attacking
     (0, 1000),
     # Defending

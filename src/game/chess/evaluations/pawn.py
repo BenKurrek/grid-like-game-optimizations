@@ -16,17 +16,17 @@ pawn_weight_labels = [
 ]
 pawn_weight_bounds = [
     # Material
-    (0, 1000), # how much the pawn is worth
-    (0, 1000), # how center pawns are worth
-    (0, 1000), # how much doubled pawns are penalized
-    (0, 1000), # how much isolated pawns are penalized
-    (0, 1000), # how much passed pawns are worth
+    (100, 100), # how much the pawn is worth
+    (0, 100), # how center pawns are worth
+    (0, 50), # how much doubled pawns are penalized
+    (0, 100), # how much isolated pawns are penalized
+    (0, 200), # how much passed pawns are worth
      # Attacking
     (0, 1000),
     # Defending
     (0, 1000),
     # Free spaces
-    (0, 1000),
+    (0, 1000),   
 ]
 
 WHITE_SCORE_IDX = 0

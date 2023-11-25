@@ -9,7 +9,7 @@ bishop_weight_labels = [
 ]
 bishop_weight_bounds = [
     # Material
-    (0, 1000), # how much the bishop is worth
+    (220, 420), # how much the bishop is worth
      # Attacking
     (0, 1000),
     # Defending

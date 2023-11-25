@@ -10,7 +10,7 @@ queen_weight_labels = [
 ]
 queen_weight_bounds = [
     # Material
-    (0, 1000), # how much the queen is worth
+    (900, 1000), # how much the queen is worth
      # Attacking
     (0, 1000),
     # Defending
