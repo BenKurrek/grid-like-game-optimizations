@@ -9,6 +9,7 @@ def extract_random_othello_positions(num_positions=1):
         data = []
         for row in reader:
             data.append(row)
+    data = data[1:]  # Remove header row
     metadata = []    
     for i in range(num_positions):
         _, _, _, board_data = random.choice(data)

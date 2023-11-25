@@ -4,7 +4,6 @@ import configparser
 import io
 import os
 from PIL import Image
-import cairosvg
 from src.game.base_game import BaseGame
 from src.optimization.genetic_algorithm import GeneticAlgorithm
 
@@ -32,16 +31,21 @@ def main():
     best_individual = genetic_algorithm.evolve(generations=400)
     genetic_algorithm.plot_evolution_history()
 
-    svg_content = best_individual.visualize_best_move(img_size=400)
-    with open("game_board.svg", "w") as svg_file:
-        svg_file.write(svg_content)
+    if game_name == "chess":
+        import cairosvg
+        # Visualize the best move
+        svg_content = best_individual.visualize_best_move(img_size=400)
+        with open("game_board.svg", "w") as svg_file:
+            svg_file.write(svg_content)
 
-    # Convert SVG to PNG
-    png_bytes = cairosvg.svg2png(url=os.path.abspath("game_board.svg"))
+        # Convert SVG to PNG
+        png_bytes = cairosvg.svg2png(url=os.path.abspath("game_board.svg"))
 
-    # Display the PNG image
-    image = Image.open(io.BytesIO(png_bytes))
-    image.show()
+        # Display the PNG image
+        image = Image.open(io.BytesIO(png_bytes))
+        image.show()
+    elif game_name == "othello":
+        best_individual.visualize_best_move(img_size=400)
 
 if __name__ == "__main__":
     main()
