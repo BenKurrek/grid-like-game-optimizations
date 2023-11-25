@@ -8,7 +8,8 @@ pawn_weight_labels = [
     "Pawn Material Weight",
     "Center Pawn Weight",
     "Double Pawn Weight",
-    "Iso Pawn Weight"
+    "Iso Pawn Weight",
+    "Passed Pawn Weight",
 ]
 pawn_weight_bounds = [
     # Material
@@ -16,6 +17,7 @@ pawn_weight_bounds = [
     (0, 1000), # how center pawns are worth
     (0, 1000), # how much doubled pawns are penalized
     (0, 1000), # how much isolated pawns are penalized
+    (0, 1000), # how much passed pawns are worth
 ]
 
 WHITE_SCORE_IDX = 0
@@ -35,6 +37,8 @@ class PawnEvaluator:
 
     def evaluation_for_square(self, square, piece):
         if piece.piece_type == chess.PAWN:
+            is_double_pawn, is_passed_pawn = self.check_file_data(square, piece)
+
             # If the square is a pawn, give it the material bonus
             self.material_evaluation(piece)
 
@@ -43,8 +47,12 @@ class PawnEvaluator:
                 self.center_pawn_evaluation(piece)
 
             # If the square is a double pawn, give it a penalty
-            if self.is_double_pawn(square, piece):
+            if is_double_pawn:
                 self.double_pawn_evaluation(piece)
+
+            # If the square is a passed pawn, give it a bonus
+            if is_passed_pawn:
+                self.passed_pawn_evaluation(piece)
 
             # If the square is an isolated pawn, give it a penalty
             if self.is_isolated_pawn(square, piece):
@@ -74,15 +82,48 @@ class PawnEvaluator:
         else:
             self.scores_for_weights[double_pawn_idx][BLACK_SCORE_IDX] -= 1
 
-    def is_double_pawn(self, square, piece):
+    def check_file_data(self, square, piece):
+        is_double_pawn = False
+        is_passed_pawn = True
+        
         file = chess.square_file(square)
         
         # go through other squares in the same file
         for rank in range(8):
-            other_square = chess.square(file, rank)
-            other_piece = self.board.piece_at(other_square)
-            if other_piece is not None and other_piece.piece_type == chess.PAWN and other_piece.color == piece.color and other_square != square:
-                return True
+            left_file_idx = file - 1
+            right_file_idx = file + 1
+
+            left_file_square = chess.square(left_file_idx, rank)
+            cur_file_square = chess.square(file, rank)
+            right_file_square = chess.square(right_file_idx, rank)
+
+            cur_file_piece = self.board.piece_at(cur_file_square)
+            left_file_piece = None
+            right_file_piece = None
+            
+            # Make sure files are in bounds
+            if left_file_idx >= 0:
+                left_file_piece = self.board.piece_at(left_file_square)
+            if right_file_idx <= 7: 
+                right_file_piece = self.board.piece_at(right_file_square)
+
+            # Check for double pawn (if same color in same file)
+            if cur_file_piece is not None and cur_file_piece.piece_type == chess.PAWN and cur_file_piece.color == piece.color and cur_file_square != square:
+                is_double_pawn = True
+
+            # Check for enemy pawn on left side
+            if left_file_piece is not None and left_file_piece.piece_type == chess.PAWN and left_file_piece.color != piece.color:
+                is_passed_pawn = False
+
+            # Check for enemy pawn on right side
+            if right_file_piece is not None and right_file_piece.piece_type == chess.PAWN and right_file_piece.color != piece.color:
+                is_passed_pawn = False
+            
+            # Check for enemy pawn in same file
+            if cur_file_piece is not None and cur_file_piece.piece_type == chess.PAWN and cur_file_piece.color != piece.color:
+                is_passed_pawn = False
+
+        return is_double_pawn, is_passed_pawn
 
     # Subtract the weight for an isolated pawn
     def isolated_pawn_evaluation(self, piece):
@@ -115,3 +156,16 @@ class PawnEvaluator:
                     return False
 
         return True
+
+    # Add the weight for a passed pawn
+    def passed_pawn_evaluation(self, piece):
+        if piece.color == chess.WHITE:
+            ranks_until_promotion = 7 - chess.square_rank(piece.square())
+        else:
+            ranks_until_promotion = chess.square_rank(piece.square())
+            
+        passed_pawn_idx = 4
+        if piece.color == chess.WHITE:
+            self.scores_for_weights[passed_pawn_idx][WHITE_SCORE_IDX] += ranks_until_promotion
+        else:
+            self.scores_for_weights[passed_pawn_idx][BLACK_SCORE_IDX] += ranks_until_promotion
