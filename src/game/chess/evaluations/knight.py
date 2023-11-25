@@ -20,6 +20,9 @@ knight_weight_bounds = [
     (0, 1000),
 ]
 
+WHITE_SCORE_IDX = 0
+BLACK_SCORE_IDX = 1
+
 WHITE_POSITION_MAPPING = {
     "a1": -50, "b1": -40, "c1": -30, "d1": -30, "e1": -30, "f1": -30, "g1": -40, "h1": -50,
     "a2": -40, "b2": -20, "c2": 0, "d2": 0, "e2": 0, "f2": 0, "g2": -20, "h2": -40,
@@ -61,11 +64,9 @@ class KnightEvaluator:
             self.king_attacking_defending_evalutation(square, piece)
 
     def material_evaluation(self, piece: chess.Piece):
-        if piece.piece_type == chess.KNIGHT:
-            if piece.color == chess.WHITE:
-                self.scores_for_weights[0][0] += 1
-            else:
-                self.scores_for_weights[0][1] += 1
+        knight_material_idx = 0
+        score_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
+        self.scores_for_weights[knight_material_idx][score_idx] += 1
                 
     def position_evaluation(self, square: chess.Square, piece: chess.Piece):
         if piece.piece_type == chess.KNIGHT:
@@ -79,17 +80,21 @@ class KnightEvaluator:
                 self.scores_for_weights[1][1] += square_value
                 
     def king_attacking_defending_evalutation(self, square: chess.Square, piece: chess.Piece):
+        attacking_pawn_idx = 2
+        defending_pawn_idx = 3
+        
         attacking_king_squares = self.adjacent_white_king_squares if piece.color == chess.BLACK else self.adjacent_black_king_squares
         defending_king_squares = self.adjacent_white_king_squares if piece.color == chess.WHITE else self.adjacent_black_king_squares
         
+        score_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
         knight_attack_squares = [chess.square_name(square) for square in list(self.board.attacks(square))]
         
         for knight_attack_square in knight_attack_squares:
             # Attacking
             if knight_attack_square in attacking_king_squares:
-                self.scores_for_weights[2][0] += 1
+                self.scores_for_weights[attacking_pawn_idx][score_idx] += 1
             
             # Defending   
             if knight_attack_square in defending_king_squares:
-                self.scores_for_weights[3][0] += 1
+                self.scores_for_weights[defending_pawn_idx][score_idx] += 1
                 
