@@ -10,6 +10,8 @@ pawn_weight_labels = [
     "Double Pawn Weight",
     "Iso Pawn Weight",
     "Passed Pawn Weight",
+    "Pawn Attacking Weight",
+    "Pawn Defending Weight"
 ]
 pawn_weight_bounds = [
     # Material
@@ -18,29 +20,36 @@ pawn_weight_bounds = [
     (0, 1000), # how much doubled pawns are penalized
     (0, 1000), # how much isolated pawns are penalized
     (0, 1000), # how much passed pawns are worth
+     # Attacking
+    (0, 1000),
+    # Defending
+    (0, 1000),
 ]
 
 WHITE_SCORE_IDX = 0
 BLACK_SCORE_IDX = 1
 
 class PawnEvaluator:
-    def __init__(self, board):
+    def __init__(self, board: chess.Board):
         self.board = board
         # (W, B) scores for each weight
         self.scores_for_weights = [[0.0, 0.0] for _ in range(len(pawn_weight_labels))]
 
         self.pawn_islands = 0
         self.seen_files = set()
+        self.adjacent_white_king_squares = [chess.square_name(square) for square in list(self.board.attacks(self.board.king(chess.WHITE)))]
+        self.adjacent_black_king_squares = [chess.square_name(square) for square in list(self.board.attacks(self.board.king(chess.BLACK)))]
 
     def get_scores_for_weights(self):
         return self.scores_for_weights
 
-    def evaluation_for_square(self, square, piece):
+    def evaluation_for_square(self, square: chess.Square, piece: chess.Piece):
         if piece.piece_type == chess.PAWN:
             is_double_pawn, is_passed_pawn = self.check_file_data(square, piece)
 
             # If the square is a pawn, give it the material bonus
             self.material_evaluation(piece)
+            self.king_attacking_defending_evalutation(square, piece)
 
             # If the square is in the center, give it a bonus
             if square in chess.SquareSet(chess.BB_CENTER):
@@ -52,7 +61,7 @@ class PawnEvaluator:
 
             # If the square is a passed pawn, give it a bonus
             if is_passed_pawn:
-                self.passed_pawn_evaluation(piece)
+                self.passed_pawn_evaluation(square, piece)
 
             # If the square is an isolated pawn, give it a penalty
             if self.is_isolated_pawn(square, piece):
@@ -158,14 +167,33 @@ class PawnEvaluator:
         return True
 
     # Add the weight for a passed pawn
-    def passed_pawn_evaluation(self, piece):
+    def passed_pawn_evaluation(self, square: chess.Square, piece: chess.Piece):
         if piece.color == chess.WHITE:
-            ranks_until_promotion = 7 - chess.square_rank(piece.square())
+            ranks_until_promotion = 7 - chess.square_rank(square)
         else:
-            ranks_until_promotion = chess.square_rank(piece.square())
+            ranks_until_promotion = chess.square_rank(square)
             
         passed_pawn_idx = 4
         if piece.color == chess.WHITE:
             self.scores_for_weights[passed_pawn_idx][WHITE_SCORE_IDX] += ranks_until_promotion
         else:
             self.scores_for_weights[passed_pawn_idx][BLACK_SCORE_IDX] += ranks_until_promotion
+         
+    def king_attacking_defending_evalutation(self, square: chess.Square, piece: chess.Piece):
+        attacking_pawn_idx = 5
+        defending_pawn_idx = 6
+        
+        attacking_king_squares = self.adjacent_white_king_squares if piece.color == chess.BLACK else self.adjacent_black_king_squares
+        defending_king_squares = self.adjacent_white_king_squares if piece.color == chess.WHITE else self.adjacent_black_king_squares
+        
+        score_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
+        pawn_attack_squares = [chess.square_name(square) for square in list(self.board.attacks(square))]
+        
+        for pawn_attack_square in pawn_attack_squares:
+            # Attacking
+            if pawn_attack_square in attacking_king_squares:
+                self.scores_for_weights[attacking_pawn_idx][score_idx] += 1
+            
+            # Defending   
+            if pawn_attack_square in defending_king_squares:
+                self.scores_for_weights[defending_pawn_idx][score_idx] += 1
