@@ -74,6 +74,8 @@ class ChessGame(BaseGame):
     def evaluate_board_state(self, board):
         score = 0
 
+        
+
         # Instantiate the evaluators and update their scores for each square in the board
         # At the end, the score will be the sum of all the evaluations
         queen_evaluator = QueenEvaluator(board, self.weights[0])

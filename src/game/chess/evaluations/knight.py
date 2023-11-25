@@ -5,13 +5,19 @@ import random
 
 knight_weight_labels = [
     "Knight Material Weight",
-    "Knight Position Weight"
+    "Knight Position Weight",
+    "Knight Attacking Weight",
+    "Knight Defending Weight"
 ]
 knight_weight_bounds = [
     # Material
     (0, 1000), # how much the knight is worth
     # Position
     (0, 100), # how much the knoght position is worth
+    # Attacking
+    (0, 1000),
+    # Defending
+    (0, 1000),
 ]
 
 WHITE_POSITION_MAPPING = {
@@ -43,6 +49,8 @@ class KnightEvaluator:
         self.scores_for_weights = [[0.0, 0.0] for _ in range(len(knight_weight_bounds))]
 
         self.board = board
+        self.adjacent_white_king_squares = [chess.square_name(square) for square in list(self.board.attacks(self.board.king(chess.WHITE)))]
+        self.adjacent_black_king_squares = [chess.square_name(square) for square in list(self.board.attacks(self.board.king(chess.BLACK)))]
 
     def get_score(self):
         white_score = 0
@@ -57,13 +65,14 @@ class KnightEvaluator:
         if piece.piece_type == chess.KNIGHT:
             self.material_evaluation(piece)
             self.position_evaluation(square, piece)
+            self.king_attacking_defending_evalutation(square, piece)
 
     def material_evaluation(self, piece: chess.Piece):
         if piece.piece_type == chess.KNIGHT:
             if piece.color == chess.WHITE:
-                self.scores_for_weights[0][0] += self.weights[0]
+                self.scores_for_weights[0][0] += 1
             else:
-                self.scores_for_weights[0][1] += self.weights[0]
+                self.scores_for_weights[0][1] += 1
                 
     def position_evaluation(self, square: chess.Square, piece: chess.Piece):
         if piece.piece_type == chess.KNIGHT:
@@ -71,7 +80,23 @@ class KnightEvaluator:
             
             if piece.color == chess.WHITE:
                 square_value = WHITE_POSITION_MAPPING[square_name]
-                self.scores_for_weights[1][0] += self.weights[1]*square_value
+                self.scores_for_weights[1][0] += square_value
             else:
                 square_value = BLACK_POSITION_MAPPING[square_name]
-                self.scores_for_weights[1][1] += self.weights[1]*square_value
+                self.scores_for_weights[1][1] += square_value
+                
+    def king_attacking_defending_evalutation(self, square: chess.Square, piece: chess.Piece):
+        attacking_king_squares = self.adjacent_white_king_squares if piece.color == chess.BLACK else self.adjacent_black_king_squares
+        defending_king_squares = self.adjacent_white_king_squares if piece.color == chess.WHITE else self.adjacent_black_king_squares
+        
+        knight_attack_squares = [chess.square_name(square) for square in list(self.board.attacks(square))]
+        
+        for knight_attack_square in knight_attack_squares:
+            # Attacking
+            if knight_attack_square in attacking_king_squares:
+                self.scores_for_weights[2][0] += 1
+            
+            # Defending   
+            if knight_attack_square in defending_king_squares:
+                self.scores_for_weights[3][0] += 1
+                
