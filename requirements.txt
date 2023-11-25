@@ -3,3 +3,4 @@ pillow
 cairosvg
 tqdm
 matplotlib
+itertools

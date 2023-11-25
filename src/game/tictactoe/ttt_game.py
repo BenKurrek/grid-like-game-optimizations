@@ -6,33 +6,49 @@ from src.game.base_game import BaseGame
 import json
 
 weight_labels = [
-    "Pawn Weight",
-    "Knight Weight",
-    "Bishop Weight",
-    "Rook Weight",
-    "Queen Weight",
-    "King Weight",
-    "Total Material Weight",
-    "Pawn Structure Weight",
-    "Piece Development Weight",
-    "King Safety Weight",
-    "Control of Key Squares Weight"
+    "A1",
+    "A2",
+    "A3",
+    "B1",
+    "B2",
+    "B3",
+    "C1",
+    "C2",
+    "C3",
+    "row1",
+    "row2",
+    "row3",
+    "col1",
+    "col2",
+    "col3",
+    "cross-left-to-right",
+    "cross-right-to-left",
+    "blocking-horizontal",
+    "blocking-vertical",
+    "blocking-cross",
 ]
 weight_bounds = [
     # Material
-    (0, 1000), # pawn
-    (0, 1000), # knight
-    (0, 1000), # bishop    
-    (0, 1000), # rook
-    (0, 1000), # queen
-    (1, 1), # king
-
-    # Extra
-    (1, 1), # Total Material Weight
-    (0, 0), # pawn structure
-    (0, 0), # piece development
-    (0, 0), # king safety
-    (0, 0), # control of key squares
+    (0, 1000), # A1
+    (0, 1000), # A2
+    (0, 1000), # A3    
+    (0, 1000), # B1
+    (0, 1000), # B2
+    (0, 1000), # B3
+    (0, 1000), # C1  
+    (0, 1000), # C2
+    (0, 1000), # C3
+    (0, 1000), #row1
+    (0, 1000), #row2
+    (0, 1000), #row3
+    (0, 1000), #col1
+    (0, 1000), #col2
+    (0, 1000), #col3
+    (0, 1000), #cross-left-to-right
+    (0, 1000), #cross-right-to-left
+    (0, 1000), #blocking-horizontal
+    (0, 1000), #blocking-vertical
+    (0, 1000), #blocking-cross
 ]
 
 piece_map = {
@@ -58,7 +74,7 @@ class tttGame(BaseGame):
         self.move_sequences = move_sequences
         self.ranked_moves = ranked_moves
 
-        self.turn = "White" if self.board.turn == chess.WHITE else "Black"
+        self.turn = "X" if self.board.turn == chess.WHITE else "O"
         self.stockfish_move = self.move_sequences['stockfish']['move']
         self.stockfish_score = self.move_sequences['stockfish']['score']
         self.gm_move = self.game_moves[0]

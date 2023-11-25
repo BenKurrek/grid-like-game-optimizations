@@ -29,6 +29,8 @@ def main():
     # Create a GeneticAlgorithm instance
     genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.5)
 
+    return
+
     # Evolve the population for a certain number of generations
     best_individual = genetic_algorithm.evolve(generations=400)
     genetic_algorithm.plot_evolution_history()
