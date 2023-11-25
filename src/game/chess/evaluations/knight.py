@@ -43,8 +43,7 @@ BLACK_POSITION_MAPPING = {
 }
 
 class KnightEvaluator:
-    def __init__(self, board: chess.Board, weights):
-        self.weights = weights
+    def __init__(self, board: chess.Board):
         # (W, B) scores for each weight
         self.scores_for_weights = [[0.0, 0.0] for _ in range(len(knight_weight_bounds))]
 
@@ -52,14 +51,8 @@ class KnightEvaluator:
         self.adjacent_white_king_squares = [chess.square_name(square) for square in list(self.board.attacks(self.board.king(chess.WHITE)))]
         self.adjacent_black_king_squares = [chess.square_name(square) for square in list(self.board.attacks(self.board.king(chess.BLACK)))]
 
-    def get_score(self):
-        white_score = 0
-        black_score = 0
-        for weight_index, (white_weight, black_weight) in enumerate(self.scores_for_weights):
-            white_score += white_weight
-            black_score += black_weight
-
-        return (white_score, black_score)
+    def get_scores_for_weights(self):
+        return self.scores_for_weights
 
     def evaluation_for_square(self, square, piece):
         if piece.piece_type == chess.KNIGHT:

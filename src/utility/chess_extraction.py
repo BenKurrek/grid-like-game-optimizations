@@ -89,6 +89,7 @@ def extract_random_chess_positions(num_positions):
         # print(f"Position: {board.fen()}")
         # print(f"Turn: {'White' if board.turn == chess.WHITE else 'Black'}")
         # print(f"Next Move (IN EXTRACTION): {board_moves[0] if board_moves else 'Game Over'}\n")
-        board_data.append((board, board_moves, move_sequences, ranked_moves))
+        board_data.append((board, board_moves, move_sequences, ranked_moves, {}))
+
 
     return board_data

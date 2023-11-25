@@ -15,7 +15,7 @@ import json
 
 class ChessGame(BaseGame):
     def __init__(self, meta):
-        board, game_moves, move_sequences, ranked_moves = meta
+        board, game_moves, move_sequences, ranked_moves, eval_count_cache = meta
 
         self.board = board
         self.game_moves = game_moves
@@ -29,9 +29,12 @@ class ChessGame(BaseGame):
 
         self.initialize_random_weights()
 
+        self.eval_count_cache = eval_count_cache
+        self.eval_count_from_cache(self.board)
+
     # Random starting genes for the chromosome based on lower and upper bounds
     def initialize_random_weights(self):
-        self.weights = [
+        self.weight_for_eval_counts = [
             [random.uniform(float(lower), float(upper)) for lower, upper in queen_weight_bounds],
             [random.uniform(float(lower), float(upper)) for lower, upper in rook_weight_bounds],
             [random.uniform(float(lower), float(upper)) for lower, upper in knight_weight_bounds],
@@ -41,7 +44,7 @@ class ChessGame(BaseGame):
         ]
 
     def get_board_data(self):
-        return [self.board, self.game_moves, self.move_sequences, self.ranked_moves]
+        return [self.board, self.game_moves, self.move_sequences, self.ranked_moves, self.eval_count_cache]
 
     def rank_move(self, move):
         return (self.ranked_moves[str(move)], len(list(self.board.legal_moves)))
@@ -49,12 +52,11 @@ class ChessGame(BaseGame):
     def get_weights(self):
         # concatenate all the weights into a single list
         concatenated_weights = []
-        for sublist in self.weights:
+        for sublist in self.weight_for_eval_counts:
             concatenated_weights.extend(sublist)
 
         return concatenated_weights
 
-    
     def get_weight_bounds(self):
         return queen_weight_bounds + rook_weight_bounds + knight_weight_bounds + bishop_weight_bounds + king_weight_bounds + pawn_weight_bounds
     
@@ -69,21 +71,22 @@ class ChessGame(BaseGame):
         king_weights = weights[len(queen_weight_bounds) + len(rook_weight_bounds) + len(knight_weight_bounds) + len(bishop_weight_bounds):len(queen_weight_bounds) + len(rook_weight_bounds) + len(knight_weight_bounds) + len(bishop_weight_bounds) + len(king_weight_bounds)]
         pawn_weights = weights[len(queen_weight_bounds) + len(rook_weight_bounds) + len(knight_weight_bounds) + len(bishop_weight_bounds) + len(king_weight_bounds):]
 
-        self.weights = [queen_weights, rook_weights, knight_weights, bishop_weights, king_weights, pawn_weights]
+        self.weight_for_eval_counts = [queen_weights, rook_weights, knight_weights, bishop_weights, king_weights, pawn_weights]
     
-    def evaluate_board_state(self, board):
-        score = 0
+    def eval_count_from_cache(self, board):
+        if self.eval_count_cache.get(str(board)) is not None:
+            return self.eval_count_cache.get(str(board))
 
         
 
         # Instantiate the evaluators and update their scores for each square in the board
         # At the end, the score will be the sum of all the evaluations
-        queen_evaluator = QueenEvaluator(board, self.weights[0])
-        rook_evaluator = RookEvaluator(board, self.weights[1])
-        knight_evaluator = KnightEvaluator(board, self.weights[2])
-        bishop_evaluator = BishopEvaluator(board, self.weights[3])
-        king_evaluator = KingEvaluator(board, self.weights[4])
-        pawn_evaluator = PawnEvaluator(board, self.weights[5])
+        queen_evaluator = QueenEvaluator(board)
+        rook_evaluator = RookEvaluator(board)
+        knight_evaluator = KnightEvaluator(board)
+        bishop_evaluator = BishopEvaluator(board)
+        king_evaluator = KingEvaluator(board)
+        pawn_evaluator = PawnEvaluator(board)
 
         for square in chess.SQUARES:
             piece = board.piece_at(square)
@@ -96,28 +99,44 @@ class ChessGame(BaseGame):
                 pawn_evaluator.evaluation_for_square(square, piece)
 
         # Add the scores for each evaluator to the total score
-        queen_score = queen_evaluator.get_score()
-        rook_score = rook_evaluator.get_score()
-        knight_score = knight_evaluator.get_score()
-        bishop_score = bishop_evaluator.get_score()
-        king_score = king_evaluator.get_score()
-        pawn_score = pawn_evaluator.get_score()
+        queen_scores_for_weights = queen_evaluator.get_scores_for_weights()
+        rook_scores_for_weights = rook_evaluator.get_scores_for_weights()
+        knight_scores_for_weights = knight_evaluator.get_scores_for_weights()
+        bishop_scores_for_weights = bishop_evaluator.get_scores_for_weights()
+        king_scores_for_weights = king_evaluator.get_scores_for_weights()
+        pawn_scores_for_weights = pawn_evaluator.get_scores_for_weights()
 
-        white_score = queen_score[0] + rook_score[0] + knight_score[0] + bishop_score[0] + king_score[0] + pawn_score[0]
-        black_score = queen_score[1] + rook_score[1] + knight_score[1] + bishop_score[1] + king_score[1] + pawn_score[1]
+        eval_count_for_weight = [queen_scores_for_weights, rook_scores_for_weights, knight_scores_for_weights, bishop_scores_for_weights, king_scores_for_weights, pawn_scores_for_weights]
 
-        #print(f"White Score: {white_score}, Black Score: {black_score}")
+        self.eval_count_cache[str(board)] = eval_count_for_weight
+        return eval_count_for_weight
+
+    def score_board_state(self, board):
+        eval_count_for_weight = self.eval_count_from_cache(board)
+
+        white_score = 0
+        black_score = 0
+        # Sum the scores for each weight
+        for piece_type, eval_counts in enumerate(eval_count_for_weight):
+            piece_weights = self.weight_for_eval_counts[piece_type]
+
+            for weight_idx, eval_count_for_weight in enumerate(eval_counts):
+                weight = piece_weights[weight_idx]
+
+                white_score += weight * eval_count_for_weight[0]
+                black_score += weight * eval_count_for_weight[1]
+
         return white_score - black_score
 
     def evaluate_move(self, move):
         new_board = self.board.copy()
-        initial_score = self.evaluate_board_state(new_board)
+        initial_score = self.score_board_state(new_board)
 
         # Push the desired moves and then also the move that stockfish would make in retaliation
         for next_move in self.move_sequences[str(move)]['next_moves']:
             new_board.push(chess.Move.from_uci(next_move.uci()))
     
-        final_score = self.evaluate_board_state(new_board)
+        final_score = self.score_board_state(new_board)
         
         # DEBUGGING
         #if move == self.stockfish_move:
