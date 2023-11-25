@@ -1,12 +1,11 @@
 from abc import ABC, abstractmethod
 
 class BaseGame(ABC):
+    def __init__(self, game):
+        self.game = game
+       
     @abstractmethod
     def update_weights(self, weights):
-        pass
-
-    @abstractmethod
-    def get_board_data(self):
         pass
 
     @abstractmethod
@@ -22,11 +21,15 @@ class BaseGame(ABC):
         pass
 
     @abstractmethod
-    def get_weights(self):
+    def mutate(self):
         pass
 
     @abstractmethod
-    def get_weight_bounds(self):
+    def crossover(self, game2):
+        pass
+
+    @abstractmethod
+    def get_weights(self):
         pass
     
     @abstractmethod
