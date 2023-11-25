@@ -46,15 +46,14 @@ class PawnEvaluator:
     def get_scores_for_weights(self):
         return self.scores_for_weights
 
-    def evaluation_for_square(self, square: chess.Square, piece: chess.Piece):
-        pawn_attack_squares = [chess.square_name(square) for square in list(self.board.attacks(square))]
+    def evaluation_for_square(self, square: chess.Square, piece: chess.Piece, attack_squares: list[str]):
         if piece.piece_type == chess.PAWN:
             is_double_pawn, is_passed_pawn = self.check_file_data(square, piece)
 
             # If the square is a pawn, give it the material bonus
             self.material_evaluation(piece)
-            self.king_attacking_defending_evalutation(pawn_attack_squares, square, piece)
-            self.free_squares_evaluation(pawn_attack_squares, piece)
+            self.king_attacking_defending_evalutation(attack_squares, square, piece)
+            self.free_squares_evaluation(attack_squares, piece)
 
             # If the square is in the center, give it a bonus
             if square in chess.SquareSet(chess.BB_CENTER):
@@ -163,8 +162,8 @@ class PawnEvaluator:
 
                 # Check if the neighboring square is within the valid file and rank range
                 if (
-                    1 <= neighbor_file <= 8 and
-                    1 <= neighbor_rank <= 8 and
+                    0 <= neighbor_file <= 7 and
+                    0 <= neighbor_rank <= 7 and
                     self.board.piece_at(chess.square(neighbor_file, neighbor_rank)) == chess.Piece(chess.PAWN, piece.color)
                 ):
                     return False

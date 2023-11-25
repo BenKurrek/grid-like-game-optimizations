@@ -91,12 +91,15 @@ class ChessGame(BaseGame):
         for square in chess.SQUARES:
             piece = board.piece_at(square)
             if piece:
-                queen_evaluator.evaluation_for_square(square, piece)
-                rook_evaluator.evaluation_for_square(square, piece)
-                knight_evaluator.evaluation_for_square(square, piece)
-                bishop_evaluator.evaluation_for_square(square, piece)
+                # Get the squares that the piece is attacking
+                attack_squares = [chess.square_name(square) for square in list(board.attacks(square))]
+                
+                queen_evaluator.evaluation_for_square(square, piece, attack_squares)
+                rook_evaluator.evaluation_for_square(square, piece, attack_squares)
+                knight_evaluator.evaluation_for_square(square, piece, attack_squares)
+                bishop_evaluator.evaluation_for_square(square, piece, attack_squares)
+                pawn_evaluator.evaluation_for_square(square, piece, attack_squares)
                 king_evaluator.evaluation_for_square(square, piece)
-                pawn_evaluator.evaluation_for_square(square, piece)
 
         # Add the scores for each evaluator to the total score
         queen_scores_for_weights = queen_evaluator.get_scores_for_weights()

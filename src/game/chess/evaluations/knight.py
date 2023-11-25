@@ -60,13 +60,12 @@ class KnightEvaluator:
     def get_scores_for_weights(self):
         return self.scores_for_weights
 
-    def evaluation_for_square(self, square, piece):
-        knight_attack_squares = [chess.square_name(square) for square in list(self.board.attacks(square))]
+    def evaluation_for_square(self, square, piece, attack_squares):
         if piece.piece_type == chess.KNIGHT:
             self.material_evaluation(piece)
             self.position_evaluation(square, piece)
-            self.king_attacking_defending_evalutation(knight_attack_squares, piece)
-            self.free_squares_evaluation(knight_attack_squares, piece)
+            self.king_attacking_defending_evalutation(attack_squares, piece)
+            self.free_squares_evaluation(attack_squares, piece)
 
     def material_evaluation(self, piece: chess.Piece):
         knight_material_idx = 0

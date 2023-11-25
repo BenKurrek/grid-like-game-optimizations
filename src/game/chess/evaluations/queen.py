@@ -33,12 +33,11 @@ class QueenEvaluator:
     def get_scores_for_weights(self):
         return self.scores_for_weights
 
-    def evaluation_for_square(self, square, piece):
-        queen_attack_squares = [chess.square_name(square) for square in list(self.board.attacks(square))]
+    def evaluation_for_square(self, square, piece, attack_squares):
         if piece.piece_type == chess.QUEEN:
             self.material_evaluation(piece)
-            self.king_attacking_defending_evalutation(queen_attack_squares, square, piece)
-            self.free_squares_evaluation(queen_attack_squares, piece)
+            self.king_attacking_defending_evalutation(attack_squares, square, piece)
+            self.free_squares_evaluation(attack_squares, piece)
 
     def material_evaluation(self, piece):
         queen_material_idx = 0
