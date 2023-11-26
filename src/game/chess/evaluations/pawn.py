@@ -26,14 +26,14 @@ pawn_weight_bounds = [
     (0, 50), # how much doubled pawns are penalized
     (0, 100), # how much isolated pawns are penalized
     (0, 200), # how much passed pawns are worth
-    (0, 1000), # how much pawns that attack the enemy king are worth
-    (0, 1000), # how much pawns that defend your king are worth
-    (0, 1000), # how much the mobility of pawns are worth
-    (0, 1000), # how much blocked pawns are penalized
-    (0, 1000), # how much blocked passed pawns are penalized
-    (0, 1000), # how much blocked central pawns are penalized
-    (0, 1000), # how much pawns that protect the player's area are worth
-    (0, 1000), # how much rooks that are behind passed pawns are worth
+    (0, 10), # how much pawns that attack the enemy king are worth
+    (0, 100), # how much pawns that defend your king are worth
+    (0, 50), # how much the mobility of pawns are worth
+    (0, 50), # how much blocked pawns are penalized
+    (0, 50), # how much blocked passed pawns are penalized
+    (0, 50), # how much blocked central pawns are penalized
+    (0, 50), # how much pawns that protect the player's area are worth
+    (0, 100), # how much rooks that are behind passed pawns are worth
 ]
 
 WHITE_SCORE_IDX = 0

@@ -10,9 +10,9 @@ queen_weight_labels = [
 ]
 queen_weight_bounds = [
     (900, 1000), # how much the queen is worth
-    (0, 1000), # how much queens that attack the enemy king are worth
-    (0, 1000), # how much queens that defend your king are worth
-    (0, 1000), # how much the mobility of queen is worth
+    (0, 100), # how much queens that attack the enemy king are worth
+    (0, 100), # how much queens that defend your king are worth
+    (0, 30), # how much the mobility of queen is worth
 ]
 
 WHITE_SCORE_IDX = 0

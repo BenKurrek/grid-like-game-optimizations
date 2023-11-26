@@ -15,14 +15,14 @@ rook_weight_labels = [
 ]
 rook_weight_bounds = [
     (400, 600), # how much the rook is worth
-    (0, 1000), # how much rooks that attack the enemy king are worth
-    (0, 1000), # how much rooks that defend your king are worth
-    (0, 1000), # how much the mobility of rook is worth
-    (0, 1000), # how much rooks on the 7th rank are worth
-    (0, 1000), # how much rooks on open files are worth
-    (0, 1000), # how much rooks on semi-open files are worth
-    (0, 1000), # how much rooks on closed files are penalized
-    (0, 1000), # how much connected rooks are worth
+    (0, 70), # how much rooks that attack the enemy king are worth
+    (0, 70), # how much rooks that defend your king are worth
+    (0, 25), # how much the mobility of rook is worth
+    (0, 100), # how much rooks on the 7th rank are worth
+    (0, 100), # how much rooks on open files are worth
+    (0, 80), # how much rooks on semi-open files are worth
+    (0, 60), # how much rooks on closed files are penalized
+    (0, 100), # how much connected rooks are worth
 ]
 
 WHITE_SCORE_IDX = 0

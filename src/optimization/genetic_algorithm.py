@@ -92,13 +92,10 @@ class GeneticAlgorithm:
         weights = game.get_weights()
         weight_bounds = game.get_weight_bounds()
 
-        print(f"Mutating weights: {weights}")
-
         weight_indices = random.sample(range(len(weights)), len(weights)//3)
         for weight_idx in weight_indices:
             weights[weight_idx] = random.uniform(float(weight_bounds[weight_idx][0]), float(weight_bounds[weight_idx][1]))
         
-        print(f"Mutated weights.")
         game.update_weights(weights)
 
     def crossover(self, game1, game2):

@@ -14,10 +14,10 @@ knight_weight_labels = [
 knight_weight_bounds = [
     (200, 400), # how much the knight is worth
     (0, 100), # how much the knights position is worth
-    (0, 1000), # how much knights that attack the enemy king are worth
-    (0, 1000), # how much knights that defend your king are worth
+    (0, 40), # how much knights that attack the enemy king are worth
+    (0, 40), # how much knights that defend your king are worth
     (0, 100), # how much the mobility of the knight is worth
-    (0, 1000), # how much knights supported by ally pawns are worth
+    (0, 100), # how much knights supported by ally pawns are worth
 ]
 
 WHITE_SCORE_IDX = 0

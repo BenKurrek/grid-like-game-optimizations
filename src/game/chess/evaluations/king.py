@@ -9,8 +9,8 @@ king_weight_labels = [
 ]
 king_weight_bounds = [
     (1.0, 1.0), # how much the king is worth
-    (0,100), # how much castling is worth
-    (0,1000), # how much it is worth if a king has already castled
+    (0,30), # how much castling is worth
+    (0,100), # how much it is worth if a king has already castled
 ]
 
 WHITE_SCORE_IDX = 0
