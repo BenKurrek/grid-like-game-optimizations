@@ -9,6 +9,10 @@ def create_base_game(game_name, game_meta):
         game = tttGame(game_meta)
         print(game.get_board_data())
         return game  # Replace with actual Othello initialization
+    elif game_name == "othello":
+        from src.game.othello.othello_game import OthelloGame
+        game = OthelloGame(game_meta)
+        return game
     # elif self.game_name == "go":
     #     self.game = Go()  # Replace with actual Go initialization
     else:
