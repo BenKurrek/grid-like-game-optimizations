@@ -2,6 +2,7 @@ import random
 from src.utility.chess_extraction import extract_random_chess_positions
 from src.utility.othello_extraction import extract_random_othello_positions
 from src.utility.game_chooser import create_base_game
+from src.game.base_game import BaseGame
 import matplotlib.pyplot as plt
 
 class GeneticAlgorithm:
@@ -114,7 +115,7 @@ class GeneticAlgorithm:
         child_game.update_weights(child_weights)
         return child_game
 
-    def evolve(self, generations, target_fitness=None):
+    def evolve(self, generations, target_fitness=None) -> BaseGame:
         for generation in range(generations):
             fitness_scores = []
             # Evaluate the fitness scores of each individual in the population
