@@ -43,7 +43,7 @@ class RookEvaluator:
     def evaluation_for_square(self, square, piece, attack_squares):
         if piece.piece_type == chess.ROOK:
             open_file, semi_open_file, closed_file = self.check_file_data(square, piece)
-            is_connected = self.is_rook_connected(attack_squares)
+            is_connected = self.is_rook_connected(attack_squares, piece)
 
             self.material_evaluation(piece)
             self.king_attacking_defending_evalutation(attack_squares, square, piece)
@@ -155,13 +155,13 @@ class RookEvaluator:
 
         return open_file, semi_open_file, closed_file
 
-
-    def is_rook_connected(self, attack_squares: list[str]):
+    def is_rook_connected(self, attack_squares: list[str], cur_rook_piece):
         for square in attack_squares:
-            piece_at_square = self.board.piece_at(square)
+            square_int = chess.parse_square(square)
+            piece_at_square = self.board.piece_at(square_int)
 
             # Check if there is another rook of the same color in the attacked squares
-            if piece_at_square and piece_at_square.piece_type == chess.ROOK and piece_at_square.color == rook.color:
+            if piece_at_square and piece_at_square.piece_type == chess.ROOK and piece_at_square.color == cur_rook_piece.color:
                 return True
 
         return False
