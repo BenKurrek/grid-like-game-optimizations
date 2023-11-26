@@ -31,8 +31,12 @@ class PSO():
         # Initalize particles and get best local and global particles.
         self.particles = self.initialize_particles()
         self.local_best = deepcopy(self.particles)
+        self.local_best_fitness = [particle.fitness()[0] for particle in self.local_best]
+        
         self.particle_momentums = [np.array([0 for j in range(len(particle.get_weights()))]) for particle in self.particles]
+        
         self.global_best = self.get_global_best()
+        self.global_best_fitness, _, _ = self.global_best.fitness()
         
         
     def initialize_particles(self) -> list[BaseGame]:
@@ -57,46 +61,55 @@ class PSO():
         history = self.history
         weight_history = self.weight_history
 
-        iterations = range(1, len(history) + 1)
+        generations = range(1, len(history) + 1)
         best_fitness_values = [entry["best_fitness"] for entry in history]
 
         # Figure 1: Best Fitness and Best Move Rank
         fig1, axes1 = plt.subplots(1, 2, figsize=(18, 6))  # 1 row, 2 columns
-
         # Plotting best fitness values
-        axes1[0].plot(iterations, best_fitness_values, marker='o')
+        axes1[0].plot(generations, best_fitness_values, marker='o')
         axes1[0].set_title('Best Fitness')
-        axes1[0].set_xlabel('Iteration')
+        axes1[0].set_xlabel('Generation')
         axes1[0].set_ylabel('Fitness')
 
-        # Plotting best move rank overtime
+        # Plotting best move rank over time
         best_move_rank_values = [entry["best_move_rank"][0] for entry in history]
         max_moves = history[0]["best_move_rank"][1]
 
-        axes1[1].plot(iterations, best_move_rank_values, marker='o')
+        axes1[1].plot(generations, best_move_rank_values, marker='o')
         axes1[1].set_title('Rank of Best Move')
-        axes1[1].set_xlabel('Iteration')
+        axes1[1].set_xlabel('Generation')
         axes1[1].set_ylabel('Rank')
         axes1[1].set_ylim(1, max_moves)
 
         # Figure 2: Weights
-        fig2, axes2 = plt.subplots(2, 3, figsize=(18, 12))  # 2 rows, 3 columns
+        total_weights = len(weight_history[0])
+        rows_per_figure = 3
+        columns_per_figure = 3
+        num_figures = (total_weights - 1) // (rows_per_figure * columns_per_figure) + 1
 
-        default_vals = [100, 300, 300, 500, 900]
-        
-        # Plotting weights
-        for i in range(5):
-            weights_values = [weights[i] for weights in weight_history]
-            axes2[i//3, i%3].plot(iterations, weights_values, marker='o')
-            axes2[i//3, i%3].axhline(y=default_vals[i], color='red', linestyle='--')  # Add red line at y=100
-            axes2[i//3, i%3].set_title(f'{self.weight_labels[i]}')
-            axes2[i//3, i%3].set_xlabel('Iteration')
-            axes2[i//3, i%3].set_ylabel(f'Weight')
-            axes2[i//3, i%3].set_ylim(0, 1000)  
+        for figure_num in range(num_figures):
+            fig, axes = plt.subplots(rows_per_figure, columns_per_figure, figsize=(18, 6))
+            start_index = figure_num * rows_per_figure * columns_per_figure
+            end_index = min((figure_num + 1) * rows_per_figure * columns_per_figure, total_weights)
+
+            # Plotting weights
+            for i in range(start_index, end_index):
+                weights_values = [weights[i] for weights in weight_history]
+
+                row_index = (i - start_index) // columns_per_figure
+                col_index = (i - start_index) % columns_per_figure
+
+                axes[row_index, col_index].plot(generations, weights_values, marker='o')
+                axes[row_index, col_index].set_title(f'{self.weight_labels[i]}')
+                axes[row_index, col_index].set_xlabel('Generation')
+                axes[row_index, col_index].set_ylabel(f'Weight')
+                axes[row_index, col_index].set_ylim(self.weight_bounds[i][0], self.weight_bounds[i][1])
+
+            fig.tight_layout()
+            plt.show()
 
         fig1.tight_layout()
-        fig2.tight_layout()
-
         plt.show()
 
     def get_global_best(self) -> BaseGame:
@@ -120,9 +133,10 @@ class PSO():
     def iterate_particle(self, particle_id):
         # Get local, global, and particle weights
         local_best_weights = np.array(self.local_best[particle_id].get_weights())
-        local_best_fitness, _, _ = self.local_best[particle_id].fitness()
+        local_best_fitness = self.local_best_fitness[particle_id]
         
-        global_best_weights = np.array(self.get_global_best().get_weights())
+        global_best_weights = np.array(self.global_best.get_weights())
+    
         particle_weights = np.array(self.particles[particle_id].get_weights())
         
         # Calculate momentum based on the ECE457A definition of momentum.
@@ -144,6 +158,12 @@ class PSO():
         new_particle_fitness, _, _ = self.particles[particle_id].fitness()
         if local_best_fitness < new_particle_fitness:
             self.local_best[particle_id] = deepcopy(self.particles[particle_id])
+            self.local_best_fitness[particle_id] = new_particle_fitness
+            
+        if self.global_best_fitness < new_particle_fitness:
+            self.global_best = deepcopy(self.particles[particle_id])
+            self.global_best_fitness = new_particle_fitness
+        
         
         
     def iterate(self, iterations, target_fitness=None):
@@ -165,7 +185,7 @@ class PSO():
             # Perform PSO iteration.
             for particle_idx in range(len(self.particles)):
                 self.iterate_particle(particle_idx)
-            self.global_best = self.get_global_best()
+
             
             # # Parents are the best individuals in the population based on fitness
             # # Choose half the parents to reproduce and create a new population
@@ -199,4 +219,5 @@ class PSO():
             print(f"Weights: {best_individual.get_weights()}\n")
 
         self.weight_labels = best_individual.get_weight_labels()
+        self.weight_bounds = best_individual.get_weight_bounds()
         return best_individual
