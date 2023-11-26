@@ -76,9 +76,11 @@ class KnightEvaluator:
                 
     def position_evaluation(self, square: chess.Square, piece: chess.Piece):
         position_evaluation_idx = 1
+        square_name = chess.square_name(square)
+
         color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
         square_value = WHITE_POSITION_MAPPING[square_name] if piece.color is chess.WHITE else BLACK_POSITION_MAPPING[square_name]
-        self.scores_for_weights[supported_knight_idx][color_idx] += square_value
+        self.scores_for_weights[position_evaluation_idx][color_idx] += square_value
                 
     def king_attacking_defending_evalutation(self, knight_attack_squares, piece: chess.Piece):
         attacking_knight_idx = 2
