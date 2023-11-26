@@ -4,3 +4,4 @@ pycairo
 cairosvg
 matplotlib
 chess
+tqdm
