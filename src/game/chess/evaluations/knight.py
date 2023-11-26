@@ -9,6 +9,7 @@ knight_weight_labels = [
     "Knight Attacking Weight",
     "Knight Defending Weight",
     "Knight number of free spaces",
+    "Knight Supported By Pawn"
 ]
 knight_weight_bounds = [
     (200, 400), # how much the knight is worth
@@ -16,6 +17,7 @@ knight_weight_bounds = [
     (0, 1000), # how much knights that attack the enemy king are worth
     (0, 1000), # how much knights that defend your king are worth
     (0, 100), # how much the mobility of the knight is worth
+    (0, 1000), # how much knights supported by ally pawns are worth
 ]
 
 WHITE_SCORE_IDX = 0
@@ -57,10 +59,15 @@ class KnightEvaluator:
 
     def evaluation_for_square(self, square, piece, attack_squares):
         if piece.piece_type == chess.KNIGHT:
+            is_supported = self.is_knight_supported_by_pawn(square, piece)
+
             self.material_evaluation(piece)
             self.position_evaluation(square, piece)
             self.king_attacking_defending_evalutation(attack_squares, piece)
             self.free_squares_evaluation(attack_squares, piece)
+
+            if is_supported:
+                self.supported_knight_evaluation(piece)
 
     def material_evaluation(self, piece: chess.Piece):
         knight_material_idx = 0
@@ -100,4 +107,36 @@ class KnightEvaluator:
         free_square_idx = 4
         color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
         self.scores_for_weights[free_square_idx][color_idx] += len(knight_attack_squares)
+
+    def supported_knight_evaluation(self, piece: chess.Piece):
+        supported_knight_idx = 5
+        color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
+        self.scores_for_weights[supported_knight_idx][color_idx] += 1
+
+
+    #UTILITY
+    def is_knight_supported_by_pawn(self, square, piece):
+        # Determine the direction of pawn movement based on the knight's color
+        pawn_direction = 1 if piece.color == chess.WHITE else -1
+
+        # Calculate the rank and file of the knight square
+        knight_rank = chess.square_rank(square)
+        knight_file = chess.square_file(square)
+
+        # Check squares adjacent to the knight
+        adjacent_squares = [
+            chess.square(knight_file - 1, knight_rank + pawn_direction),
+            chess.square(knight_file + 1, knight_rank + pawn_direction)
+        ]
+
+        # Check if there is an own pawn adjacent to the knight
+        for adjacent_square in adjacent_squares:
+            if 0 <= chess.square_file(adjacent_square) <= 7 and 0 <= chess.square_rank(adjacent_square) <= 7:
+                # Ensure the square is within bounds
+                if self.board.piece_at(adjacent_square) == chess.Piece(chess.PAWN, piece.color):
+                    # There is an own pawn adjacent to the knight
+                    return 1
+
+        # No own pawn adjacent to the knight
+        return 0
                 
