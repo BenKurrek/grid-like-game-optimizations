@@ -6,10 +6,12 @@ from src.game.base_game import BaseGame
 import matplotlib.pyplot as plt
 
 class GeneticAlgorithm:
-    def __init__(self, game_name, population_size=10, mutation_rate=0):
+    def __init__(self, game_name, population_size=10, mutation_rate=0, seed=None):
         self.history = []  
         self.weight_history = []  
         self.weight_labels = []
+        self.weight_bounds = []
+        self.seed = seed
 
         self.game_name = game_name
         self.population_size = population_size
@@ -25,14 +27,13 @@ class GeneticAlgorithm:
 
         # Figure 1: Best Fitness and Best Move Rank
         fig1, axes1 = plt.subplots(1, 2, figsize=(18, 6))  # 1 row, 2 columns
-
         # Plotting best fitness values
         axes1[0].plot(generations, best_fitness_values, marker='o')
-        axes1[0].set_title('Best Fitness')
+        axes1[0].set_title(f'Best Fitness. Seed={self.seed}')
         axes1[0].set_xlabel('Generation')
         axes1[0].set_ylabel('Fitness')
 
-        # Plotting best move rank overtime
+        # Plotting best move rank over time
         best_move_rank_values = [entry["best_move_rank"][0] for entry in history]
         max_moves = history[0]["best_move_rank"][1]
 
@@ -43,30 +44,40 @@ class GeneticAlgorithm:
         axes1[1].set_ylim(1, max_moves)
 
         # Figure 2: Weights
-        fig2, axes2 = plt.subplots(2, 3, figsize=(18, 12))  # 2 rows, 3 columns
+        total_weights = len(weight_history[0])
+        rows_per_figure = 3
+        columns_per_figure = 3
+        num_figures = (total_weights - 1) // (rows_per_figure * columns_per_figure) + 1
 
-        default_vals = [100, 300, 300, 500, 900]
-        
-        # Plotting weights
-        for i in range(5):
-            weights_values = [weights[i] for weights in weight_history]
-            axes2[i//3, i%3].plot(generations, weights_values, marker='o')
-            axes2[i//3, i%3].axhline(y=default_vals[i], color='red', linestyle='--')  # Add red line at y=100
-            axes2[i//3, i%3].set_title(f'{self.weight_labels[i]}')
-            axes2[i//3, i%3].set_xlabel('Generation')
-            axes2[i//3, i%3].set_ylabel(f'Weight')
-            axes2[i//3, i%3].set_ylim(0, 1000)  
+        for figure_num in range(num_figures):
+            fig, axes = plt.subplots(rows_per_figure, columns_per_figure, figsize=(18, 6))
+            start_index = figure_num * rows_per_figure * columns_per_figure
+            end_index = min((figure_num + 1) * rows_per_figure * columns_per_figure, total_weights)
+
+            # Plotting weights
+            for i in range(start_index, end_index):
+                weights_values = [weights[i] for weights in weight_history]
+
+                row_index = (i - start_index) // columns_per_figure
+                col_index = (i - start_index) % columns_per_figure
+
+                axes[row_index, col_index].plot(generations, weights_values, marker='o')
+                axes[row_index, col_index].set_title(f'{self.weight_labels[i]}')
+                axes[row_index, col_index].set_xlabel('Generation')
+                axes[row_index, col_index].set_ylabel(f'Weight')
+                axes[row_index, col_index].set_ylim(self.weight_bounds[i][0], self.weight_bounds[i][1])
+
+            fig.tight_layout()
+            plt.show()
 
         fig1.tight_layout()
-        fig2.tight_layout()
-
         plt.show()
 
     def initialize_population(self):
         if self.game_name == "chess":
             # Individuals in the population each start with the same random position.
             # Their chromosomes are made up of genes representing fitness function weights
-            board_data = extract_random_chess_positions(num_positions=1)[0]
+            board_data = extract_random_chess_positions(num_positions=1, seed=self.seed)[0]
             # Create the population given the set of initial individuals
             return [create_base_game(self.game_name, board_data) for _ in range(self.population_size)]
         elif self.game_name == "othello":
@@ -82,13 +93,10 @@ class GeneticAlgorithm:
         weights = game.get_weights()
         weight_bounds = game.get_weight_bounds()
 
-        print(f"Mutating weights: {weights}")
-
-        weight_indices = random.sample(range(len(weights)), 3)
+        weight_indices = random.sample(range(len(weights)), len(weights)//3)
         for weight_idx in weight_indices:
             weights[weight_idx] = random.uniform(float(weight_bounds[weight_idx][0]), float(weight_bounds[weight_idx][1]))
         
-        print(f"Mutated weights.")
         game.update_weights(weights)
 
     def crossover(self, game1, game2):
@@ -157,4 +165,5 @@ class GeneticAlgorithm:
             print(f"Weights: {best_individual.get_weights()}\n")
 
         self.weight_labels = best_individual.get_weight_labels()
+        self.weight_bounds = best_individual.get_weight_bounds()
         return best_individual
