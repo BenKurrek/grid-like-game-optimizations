@@ -57,6 +57,21 @@ class tttGame(BaseGame):
     def update_weights(self, weights):
         self.weights = weights
     
+    # Cost is the minimax difference between the actual best move and the predicted best move
+    def fitness(self):
+        score = -math.inf
+        (best_move, best_score) = self.determine_best_move_from_weights(self.board)
+        minimax_best_score = -math.inf
+        for move in self.moves_and_scores:
+            if move[1] > minimax_best_score:
+                minimax_best_score = move[1]
+                minimax_best_move = move[0]
+
+            if move[0] == best_move:
+                predicted_best_minimax_score = move[1]
+        
+        return predicted_best_minimax_score - minimax_best_score
+    
     def determine_best_move_from_weights(self):
         # start with random guesses
         best_move = available_moves(self.board)[0]
@@ -112,24 +127,7 @@ class tttGame(BaseGame):
 
         return final_score - initial_score
     
-    # Cost is the minimax difference between the actual best move and the predicted best move
-    def cost(self):
-        score = -math.inf
-        (best_move, best_score) = self.determine_best_move_from_weights(self.board)
-        minimax_best_score = -math.inf
-        for move in self.moves_and_scores:
-            if move[1] > minimax_best_score:
-                minimax_best_score = move[1]
-                minimax_best_move = move[0]
-
-            if move[0] == best_move:
-                predicted_best_minimax_score = move[1]
-        
-        return predicted_best_minimax_score - minimax_best_score
             
-        
-        
-
     def three_corners(self, board):
         # Any combination of 3 corners
         conditions = [(0, 2, 6), (2, 6, 8), (0, 2, 8), (0, 6, 8)]

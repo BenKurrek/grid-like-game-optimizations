@@ -29,22 +29,21 @@ def main():
     # Create a GeneticAlgorithm instance
     genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.5)
 
-    return
-
     # Evolve the population for a certain number of generations
     best_individual = genetic_algorithm.evolve(generations=400)
     genetic_algorithm.plot_evolution_history()
 
-    svg_content = best_individual.visualize_best_move(img_size=400)
-    with open("game_board.svg", "w") as svg_file:
-        svg_file.write(svg_content)
-
-    # Convert SVG to PNG
-    png_bytes = cairosvg.svg2png(url=os.path.abspath("game_board.svg"))
-
-    # Display the PNG image
-    image = Image.open(io.BytesIO(png_bytes))
-    image.show()
+    if game_name == "chess":
+        svg_content = best_individual.visualize_best_move(img_size=400)
+        with open("game_board.svg", "w") as svg_file:
+            svg_file.write(svg_content)
+    
+        # Convert SVG to PNG
+        png_bytes = cairosvg.svg2png(url=os.path.abspath("game_board.svg"))
+    
+        # Display the PNG image
+        image = Image.open(io.BytesIO(png_bytes))
+        image.show()
 
 if __name__ == "__main__":
     main()
