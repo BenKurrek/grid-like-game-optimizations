@@ -5,15 +5,14 @@ from chess import Square, Piece
 bishop_weight_labels = [
     "Bishop Material Weight",
     "Bishop Attacking Weight",
-    "Bishop Defending Weight"
+    "Bishop Defending Weight",
+    "Bishop Free Squares Weight",
 ]
 bishop_weight_bounds = [
-    # Material
     (220, 420), # how much the bishop is worth
-     # Attacking
-    (0, 1000),
-    # Defending
-    (0, 1000),
+    (0, 1000), # how much pawns that attack the enemy king are worth
+    (0, 1000), # how much pawns that defend your king are worth
+    (0, 1000), # how much the mobility of the bishop is worth
 ]
 
 WHITE_SCORE_IDX = 0
@@ -49,13 +48,19 @@ class BishopEvaluator:
         attacking_king_squares = self.adjacent_white_king_squares if piece.color == chess.BLACK else self.adjacent_black_king_squares
         defending_king_squares = self.adjacent_white_king_squares if piece.color == chess.WHITE else self.adjacent_black_king_squares
         
-        score_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
+        color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
         
         for bishop_attack_square in attack_squares:
             # Attacking
             if bishop_attack_square in attacking_king_squares:
-                self.scores_for_weights[attacking_bishop_idx][score_idx] += 1
+                self.scores_for_weights[attacking_bishop_idx][color_idx] += 1
             
             # Defending   
             if bishop_attack_square in defending_king_squares:
-                self.scores_for_weights[defending_bishop_idx][score_idx] += 1
+                self.scores_for_weights[defending_bishop_idx][color_idx] += 1
+
+
+    def free_squares_evaluation(self, bishop_attack_squares, piece: chess.Piece):
+        free_square_idx = 3
+        color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
+        self.scores_for_weights[free_square_idx][color_idx] += len(bishop_attack_squares)

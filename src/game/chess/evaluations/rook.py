@@ -9,14 +9,10 @@ rook_weight_labels = [
     "Rook number of free spaces",
 ]
 rook_weight_bounds = [
-    # Material
     (400, 600), # how much the rook is worth
-     # Attacking
-    (0, 1000),
-    # Defending
-    (0, 1000),
-    # Free spaces
-    (0, 1000),
+    (0, 1000), # how much rooks that attack the enemy king are worth
+    (0, 1000), # how much rooks that defend your king are worth
+    (0, 1000), # how much the mobility of rook is worth
 ]
 
 WHITE_SCORE_IDX = 0
@@ -42,8 +38,8 @@ class RookEvaluator:
 
     def material_evaluation(self, piece):
         rook_material_idx = 0
-        score_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
-        self.scores_for_weights[rook_material_idx][score_idx] += 1
+        color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
+        self.scores_for_weights[rook_material_idx][color_idx] += 1
             
     def king_attacking_defending_evalutation(self, rook_attack_squares: list[str], square: chess.Square, piece: chess.Piece):
         attacking_pawn_idx = 1
@@ -52,19 +48,19 @@ class RookEvaluator:
         attacking_king_squares = self.adjacent_white_king_squares if piece.color == chess.BLACK else self.adjacent_black_king_squares
         defending_king_squares = self.adjacent_white_king_squares if piece.color == chess.WHITE else self.adjacent_black_king_squares
     
-        score_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
+        color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
     # TODO correct color calculations
         for rook_attack_square in rook_attack_squares:
             # Attacking
             if rook_attack_square in attacking_king_squares:
-                self.scores_for_weights[attacking_pawn_idx][score_idx] += 1
+                self.scores_for_weights[attacking_pawn_idx][color_idx] += 1
             
             # Defending   
             if rook_attack_square in defending_king_squares:
-                self.scores_for_weights[defending_pawn_idx][score_idx] += 1
+                self.scores_for_weights[defending_pawn_idx][color_idx] += 1
                 
     def free_squares_evaluation(self, rook_attack_squares, piece: chess.Piece):
         free_square_idx = 3
-        score_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
-        self.scores_for_weights[free_square_idx][score_idx] = len(rook_attack_squares)
+        color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
+        self.scores_for_weights[free_square_idx][color_idx] += len(rook_attack_squares)
         

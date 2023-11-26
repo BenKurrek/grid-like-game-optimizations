@@ -150,16 +150,16 @@ class PawnEvaluator:
         attacking_king_squares = self.adjacent_white_king_squares if piece.color == chess.BLACK else self.adjacent_black_king_squares
         defending_king_squares = self.adjacent_white_king_squares if piece.color == chess.WHITE else self.adjacent_black_king_squares
         
-        score_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
+        color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
         
         for pawn_attack_square in pawn_attack_squares:
             # Attacking
             if pawn_attack_square in attacking_king_squares:
-                self.scores_for_weights[attacking_pawn_idx][score_idx] += 1
+                self.scores_for_weights[attacking_pawn_idx][color_idx] += 1
             
             # Defending   
             if pawn_attack_square in defending_king_squares:
-                self.scores_for_weights[defending_pawn_idx][score_idx] += 1
+                self.scores_for_weights[defending_pawn_idx][color_idx] += 1
 
     def mobility_evaluation(self, legal_moves, piece: chess.Piece):
         mobility_idx = 7
