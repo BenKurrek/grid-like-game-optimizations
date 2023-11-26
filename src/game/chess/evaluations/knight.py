@@ -75,15 +75,10 @@ class KnightEvaluator:
         self.scores_for_weights[knight_material_idx][color_idx] += 1
                 
     def position_evaluation(self, square: chess.Square, piece: chess.Piece):
-        if piece.piece_type == chess.KNIGHT:
-            square_name = chess.square_name(square)
-            
-            if piece.color == chess.WHITE:
-                square_value = WHITE_POSITION_MAPPING[square_name]
-                self.scores_for_weights[1][0] += square_value
-            else:
-                square_value = BLACK_POSITION_MAPPING[square_name]
-                self.scores_for_weights[1][1] += square_value
+        position_evaluation_idx = 1
+        color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
+        square_value = WHITE_POSITION_MAPPING[square_name] if piece.color is chess.WHITE else BLACK_POSITION_MAPPING[square_name]
+        self.scores_for_weights[supported_knight_idx][color_idx] += square_value
                 
     def king_attacking_defending_evalutation(self, knight_attack_squares, piece: chess.Piece):
         attacking_knight_idx = 2
@@ -112,7 +107,6 @@ class KnightEvaluator:
         supported_knight_idx = 5
         color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
         self.scores_for_weights[supported_knight_idx][color_idx] += 1
-
 
     #UTILITY
     def is_knight_supported_by_pawn(self, square, piece):
