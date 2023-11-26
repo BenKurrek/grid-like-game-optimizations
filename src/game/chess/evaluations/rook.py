@@ -10,7 +10,8 @@ rook_weight_labels = [
     "7th Rank Rook Weight",
     "Open File Rook Weight",
     "Semi-Open File Rook Weight",
-    "Closed File Rook Weight"
+    "Closed File Rook Weight",
+    "Connected Rook Weight",
 ]
 rook_weight_bounds = [
     (400, 600), # how much the rook is worth
@@ -21,6 +22,7 @@ rook_weight_bounds = [
     (0, 1000), # how much rooks on open files are worth
     (0, 1000), # how much rooks on semi-open files are worth
     (0, 1000), # how much rooks on closed files are penalized
+    (0, 1000), # how much connected rooks are worth
 ]
 
 WHITE_SCORE_IDX = 0
@@ -41,6 +43,7 @@ class RookEvaluator:
     def evaluation_for_square(self, square, piece, attack_squares):
         if piece.piece_type == chess.ROOK:
             open_file, semi_open_file, closed_file = self.check_file_data(square, piece)
+            is_connected = self.is_rook_connected(attack_squares)
 
             self.material_evaluation(piece)
             self.king_attacking_defending_evalutation(attack_squares, square, piece)
@@ -61,6 +64,9 @@ class RookEvaluator:
 
             if closed_file:
                 self.closed_file_evaluation(piece)
+
+            if is_connected:
+                self.connected_rooks_evaluation(piece)
                 
     def material_evaluation(self, piece):
         rook_material_idx = 0
@@ -91,24 +97,30 @@ class RookEvaluator:
         self.scores_for_weights[free_square_idx][color_idx] += len(rook_attack_squares)
         
     def rook_on_seventh_evaluation(self, piece: chess.Piece):
-        rook_on_seventh_idx = 3
+        rook_on_seventh_idx = 4
         color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
         self.scores_for_weights[rook_on_seventh_idx][color_idx] += 1
 
     def open_file_evaluation(self, piece: chess.Piece):
-        open_file_idx = 4
+        open_file_idx = 5
         color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
         self.scores_for_weights[open_file_idx][color_idx] += 1
     
     def semi_open_file_evaluation(self, piece: chess.Piece):
-        semi_open_file_idx = 5
+        semi_open_file_idx = 6
         color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
         self.scores_for_weights[semi_open_file_idx][color_idx] += 1
 
     def closed_file_evaluation(self, piece: chess.Piece):
-        closed_file_idx = 6
+        closed_file_idx = 7
         color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
         self.scores_for_weights[closed_file_idx][color_idx] -= 1
+
+    def connected_rooks_evaluation(self, piece: chess.Piece):
+        connected_rook_idx = 8
+        color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
+        self.scores_for_weights[connected_rook_idx][color_idx] += 1
+
 
     # UTILITY
     def check_file_data(self, square, piece):
@@ -124,12 +136,13 @@ class RookEvaluator:
         # go through other squares in the same file
         for rank in range(8):
             cur_file_square = chess.square(file, rank)
+            cur_file_piece = self.board.piece_at(int(cur_file_square))
 
             # If there is a pawn of any color
             if cur_file_piece is not None and cur_file_piece.piece_type == chess.PAWN:
                 open_file = False
 
-                # If there is a pawn of the same color we're no longer on a semi open file
+                # If there is a pawn of the same color we're no longer on a semi-open file
                 if cur_file_piece.color == piece.color:
                     semi_open_file = False
                     ally_pawn_seen = True
@@ -141,3 +154,14 @@ class RookEvaluator:
                     closed_file = True
 
         return open_file, semi_open_file, closed_file
+
+
+    def is_rook_connected(self, attack_squares: list[str]):
+        for square in attack_squares:
+            piece_at_square = self.board.piece_at(square)
+
+            # Check if there is another rook of the same color in the attacked squares
+            if piece_at_square and piece_at_square.piece_type == chess.ROOK and piece_at_square.color == rook.color:
+                return True
+
+        return False
