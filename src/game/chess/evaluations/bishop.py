@@ -72,11 +72,9 @@ class BishopEvaluator:
     def has_bishop_pair(self, piece):
         # Get the squares occupied by bishops of the specified color
         bishops_squares = self.board.pieces(chess.BISHOP, piece.color)
-        print(bishops_squares)
 
         # Count the number of bishops using the popcount() function
         bishop_count = len(bishops_squares)
-        print(bishop_count)
 
         # Check if the player has a bishop pair
         return bishop_count >= 2
