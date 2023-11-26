@@ -4,11 +4,12 @@ from src.utility.game_chooser import create_base_game
 import matplotlib.pyplot as plt
 
 class GeneticAlgorithm:
-    def __init__(self, game_name, population_size=10, mutation_rate=0):
+    def __init__(self, game_name, population_size=10, mutation_rate=0, seed=None):
         self.history = []  
         self.weight_history = []  
         self.weight_labels = []
         self.weight_bounds = []
+        self.seed = seed
 
         self.game_name = game_name
         self.population_size = population_size
@@ -26,7 +27,7 @@ class GeneticAlgorithm:
         fig1, axes1 = plt.subplots(1, 2, figsize=(18, 6))  # 1 row, 2 columns
         # Plotting best fitness values
         axes1[0].plot(generations, best_fitness_values, marker='o')
-        axes1[0].set_title('Best Fitness')
+        axes1[0].set_title(f'Best Fitness. Seed={self.seed}')
         axes1[0].set_xlabel('Generation')
         axes1[0].set_ylabel('Fitness')
 
@@ -74,7 +75,7 @@ class GeneticAlgorithm:
         if self.game_name == "chess":
             # Individuals in the population each start with the same random position.
             # Their chromosomes are made up of genes representing fitness function weights
-            board_data = extract_random_chess_positions(num_positions=1)[0]
+            board_data = extract_random_chess_positions(num_positions=1, seed=self.seed)[0]
             # Create the population given the set of initial individuals
             return [create_base_game(self.game_name, board_data) for _ in range(self.population_size)]
         # elif self.game_name == "othello":
