@@ -73,8 +73,7 @@ class GeneticAlgorithm:
             print("Tic Tac Toe")
             board_data = extract_random_ttt_positions(num_positions=1)[0]
             print(board_data)
-            return
-            #return[create_base_game(self.game_name, board_data) for _ in range(self.population_size)]
+            return[create_base_game(self.game_name, board_data) for _ in range(self.population_size)]
             # self.game = Othello( )  # Replace with actual Othello initialization
         # elif self.game_name == "go":
         #     self.game = Go()  # Replace with actual Go initialization

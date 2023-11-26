@@ -1,84 +1,38 @@
 # src/game/chess.py
+import math
 import chess
 import chess.svg
 import random
 from src.game.base_game import BaseGame
+from src.utility.ttt_extraction import available_moves, make_move, undo_move, check_winner, minimax
+from itertools import permutations
 import json
 
 weight_labels = [
-    "A1",
-    "A2",
-    "A3",
-    "B1",
-    "B2",
-    "B3",
-    "C1",
-    "C2",
-    "C3",
-    "row1",
-    "row2",
-    "row3",
-    "col1",
-    "col2",
-    "col3",
-    "cross-left-to-right",
-    "cross-right-to-left",
-    "blocking-horizontal",
-    "blocking-vertical",
-    "blocking-cross",
+    "3-corner",
+    "2-adjacent-corner",
+    "2-opposite-corner",
+    "1-corner",
+    "middle",
+    "2-in-a-row-edge",
+    "2-in-a-row-center",
 ]
 weight_bounds = [
-    # Material
-    (0, 1000), # A1
-    (0, 1000), # A2
-    (0, 1000), # A3    
-    (0, 1000), # B1
-    (0, 1000), # B2
-    (0, 1000), # B3
-    (0, 1000), # C1  
-    (0, 1000), # C2
-    (0, 1000), # C3
-    (0, 1000), #row1
-    (0, 1000), #row2
-    (0, 1000), #row3
-    (0, 1000), #col1
-    (0, 1000), #col2
-    (0, 1000), #col3
-    (0, 1000), #cross-left-to-right
-    (0, 1000), #cross-right-to-left
-    (0, 1000), #blocking-horizontal
-    (0, 1000), #blocking-vertical
-    (0, 1000), #blocking-cross
+    (-100, 100), # Holding 3 corners
+    (-100, 100), # Holding 2 adjacent corners
+    (-100, 100), # Holding 2 opposite corners
+    (-100, 100), # Holding 1 corner
+    (-100, 100), # Holding middle
+    (-100, 100), # Holding two in a row edge
+    (-100, 100), # Holding two in a row center
 ]
-
-piece_map = {
-    'p': 0,
-    'n': 1,
-    'b': 2,
-    'r': 3,
-    'q': 4,
-    'k': 5,
-    'MATERIAL_WEIGHT': 6,
-    'PAWN_STRUCTURE_WEIGHT': 7,
-    'PIECE_DEVELOPMENT_WEIGHT': 8,
-    'KING_SAFETY_WEIGHT': 9,
-    'CONTROL_KEY_SQUARES_WEIGHT': 10,
-}
 
 class tttGame(BaseGame):
     def __init__(self, meta):
-        board, game_moves, move_sequences, ranked_moves = meta
+        board, moves_and_scores = meta
 
         self.board = board
-        self.game_moves = game_moves
-        self.move_sequences = move_sequences
-        self.ranked_moves = ranked_moves
-
-        self.turn = "X" if self.board.turn == chess.WHITE else "O"
-        self.stockfish_move = self.move_sequences['stockfish']['move']
-        self.stockfish_score = self.move_sequences['stockfish']['score']
-        self.gm_move = self.game_moves[0]
-
+        self.moves_and_scores = moves_and_scores
         self.initialize_random_weights()
 
     # Random starting genes for the chromosome based on lower and upper bounds
@@ -86,7 +40,7 @@ class tttGame(BaseGame):
         self.weights = [random.uniform(float(lower), float(upper)) for lower, upper in weight_bounds]
 
     def get_board_data(self):
-        return [self.board, self.game_moves, self.move_sequences, self.ranked_moves]
+        return [self.board, self.moves_and_scores]
 
     def rank_move(self, move):
         return (self.ranked_moves[str(move)], len(list(self.board.legal_moves)))
@@ -103,136 +57,105 @@ class tttGame(BaseGame):
     def update_weights(self, weights):
         self.weights = weights
     
+    def determine_best_move_from_weights(self):
+        # start with random guesses
+        best_move = available_moves(self.board)[0]
+        best_score = -math.inf
+
+        for move in available_moves(self.board):
+            # evaluate a score for each weight
+            score = self.evaluate_move(move)
+            if score > best_score:
+                best_move = move
+                best_score = score
+            
+        return best_move, best_score
+
     def evaluate_move(self, move):
         new_board = self.board.copy()
-        initial_score = (
-            self.material_evaluation(new_board)
-            # self.pawn_structure_evaluation(new_board) +
-            # self.piece_development_evaluation(new_board) +
-            # self.king_safety_evaluation(new_board) +
-            # self.control_key_squares_evaluation(new_board)
-        )
-
-        # Push the desired moves and then also the move that stockfish would make in retaliation
-        for next_move in self.move_sequences[str(move)]['next_moves']:
-            new_board.push(chess.Move.from_uci(next_move.uci()))
-    
-        final_score = (
-            self.material_evaluation(new_board)
-            # self.pawn_structure_evaluation(new_board) +
-            # self.piece_development_evaluation(new_board) +
-            # self.king_safety_evaluation(new_board) +
-            # self.control_key_squares_evaluation(new_board)
-        )
         
-        # DEBUGGING
-        #if move == self.stockfish_move:
-            #print(f"Evaluation of stockfish move: {move} -> Score: {score}")
-        #if move == self.gm_move:
-            #print(f"Evaluation of gm move: {move} -> Score: {score}")
+        three_corners_score = self.three_corners(new_board)
+        two_adj_corners_score = self.two_adj_corners(new_board)
+        two_opp_corners_score = self.two_opp_corners(new_board)
+        one_corner_score = self.one_corner(new_board)
+        middle_score = self.middle(new_board)
+        two_in_a_row_edge_score = self.two_in_a_row_edge(new_board)
+        two_in_a_row_middle_score = self.two_in_a_row_middle(new_board)
+        initial_score = (
+            self.weights[0] * three_corners_score +
+            self.weights[1] * two_adj_corners_score +
+            self.weights[2] * two_opp_corners_score +
+            self.weights[3] * one_corner_score +
+            self.weights[4] * middle_score +
+            self.weights[5] * two_in_a_row_edge_score +
+            self.weights[6] * two_in_a_row_middle_score
+        )
 
-        #print(f"Turn: {self.turn}, Move: {move.uci()} Initial Score: {initial_score}, Final Score: {final_score}, Difference: {final_score - initial_score}\n")
+        make_move(new_board, move, "X")
+
+        three_corners_score = self.three_corners(new_board)
+        two_adj_corners_score = self.two_adj_corners(new_board)
+        two_opp_corners_score = self.two_opp_corners(new_board)
+        one_corner_score = self.one_corner(new_board)
+        middle_score = self.middle(new_board)
+        two_in_a_row_edge_score = self.two_in_a_row_edge(new_board)
+        two_in_a_row_middle_score = self.two_in_a_row_middle(new_board)
+        final_score = (
+            self.weights[0] * three_corners_score +
+            self.weights[1] * two_adj_corners_score +
+            self.weights[2] * two_opp_corners_score +
+            self.weights[3] * one_corner_score +
+            self.weights[4] * middle_score +
+            self.weights[5] * two_in_a_row_edge_score +
+            self.weights[6] * two_in_a_row_middle_score
+        )
 
         return final_score - initial_score
     
-    def material_evaluation(self, board):
-        # board_pieces = {
-        #     # P, N, B, R, Q, K
-        #     'WHITE': [0, 0, 0, 0, 0, 0],
-        #     'BLACK': [0, 0, 0, 0, 0, 0]
-        # }
+    # Cost is the minimax difference between the actual best move and the predicted best move
+    def cost(self):
+        score = -math.inf
+        (best_move, best_score) = self.determine_best_move_from_weights(self.board)
+        minimax_best_score = -math.inf
+        for move in self.moves_and_scores:
+            if move[1] > minimax_best_score:
+                minimax_best_score = move[1]
+                minimax_best_move = move[0]
 
-        # for piece in board.piece_map().values():
-        #     color = 'WHITE' if piece.color == chess.WHITE else 'BLACK'
-        #     board_pieces[color][piece_map[piece.symbol().lower()]] += 1
+            if move[0] == best_move:
+                predicted_best_minimax_score = move[1]
+        
+        return predicted_best_minimax_score - minimax_best_score
+            
+        
+        
 
-        # # Print JSON Stringified Board Pieces
-        # print(f"Board Pieces: {json.dumps(board_pieces)}")
-
-        white_material = sum(self.weights[piece_map[piece.symbol().lower()]] for piece in board.piece_map().values() if piece.color == chess.WHITE)
-        black_material = sum(self.weights[piece_map[piece.symbol().lower()]] for piece in board.piece_map().values() if piece.color == chess.BLACK)
-        evaluation = self.weights[piece_map['MATERIAL_WEIGHT']] * (white_material - black_material)
-        return evaluation
-
-    def pawn_structure_evaluation(self, board):
-        white_pawn_structure = sum(1 for square in chess.SQUARES if board.piece_at(square) == chess.Piece(chess.PAWN, chess.WHITE))
-        black_pawn_structure = sum(1 for square in chess.SQUARES if board.piece_at(square) == chess.Piece(chess.PAWN, chess.BLACK))
-        return self.weights['PAWN_STRUCTURE_WEIGHT'] * (white_pawn_structure - black_pawn_structure)
-
-    def piece_development_evaluation(self, board):
-        white_piece_development = sum(1 for square in chess.SQUARES if board.piece_at(square) and board.piece_at(square).color == chess.WHITE and square not in chess.BB_RANKS)
-        black_piece_development = sum(1 for square in chess.SQUARES if board.piece_at(square) and board.piece_at(square).color == chess.BLACK and square not in chess.BB_RANKS)
-        return self.weights['PIECE_DEVELOPMENT_WEIGHT'] * (white_piece_development - black_piece_development)
-
-    def king_safety_evaluation(self, board):
-        white_king_safety = sum(1 for square in chess.SQUARES if board.is_attacked_by(chess.BLACK, square))
-        black_king_safety = sum(1 for square in chess.SQUARES if board.is_attacked_by(chess.WHITE, square))
-        return self.weights['KING_SAFETY_WEIGHT'] * (white_king_safety - black_king_safety)
-
-    def control_key_squares_evaluation(self, board):
-        key_squares = ['e4', 'd4', 'c4', 'e5', 'd5', 'c5']
-        white_control_key_squares = sum(1 for square in key_squares if board.color_at(chess.parse_square(square)) == chess.WHITE)
-        black_control_key_squares = sum(1 for square in key_squares if board.color_at(chess.parse_square(square)) == chess.BLACK)
-        return self.weights['CONTROL_KEY_SQUARES_WEIGHT'] * (white_control_key_squares - black_control_key_squares)
+    def three_corners(self, board):
+        # Any combination of 3 corners
+        conditions = [(0, 2, 6), (2, 6, 8), (0, 2, 8), (0, 6, 8)]
+        return any(board[a] == board[b] == board[c] == "X" for a, b, c in conditions)
     
-    # Fitness is defined as the average difference between the actual stockfish score and the evaluated score
-    def fitness(self):
-        score = 0
-        legal_moves = list(self.board.legal_moves)
-        
-        best_move = best_score = None
-        
-        for move in legal_moves:
-            # Score from the perspective of whose turn it is (from stockfish)
-            actual_score = 0
-
-            # Keep track of the best move and score
-            evaluated_score = self.evaluate_move(move)
-            if best_score is None:
-                best_score = evaluated_score
-                best_move = move
-            elif self.board.turn == chess.WHITE and evaluated_score > best_score:
-                best_score = evaluated_score
-                best_move = move
-            elif self.board.turn == chess.BLACK and evaluated_score < best_score:
-                best_score = evaluated_score
-                best_move = move
-
-            actual_score = self.move_sequences[str(move)]['score'].relative.score(mate_score=2000)
-            score -= abs(evaluated_score - actual_score)
-        
-        # Interpolate the score based on its rank
-        rank = self.ranked_moves[str(best_move)]
-        # https://www.desmos.com/calculator/4envqidilb
-        score += (len(legal_moves) / rank - 8) * 10
-
-        #print(f"TURN: {self.turn}, Chosen Move: {best_move} With Score: {best_score}\nGM Move: {self.gm_move} Stockfish Move: {self.stockfish_move}, With Stockfish Evaluation: {self.stockfish_score}\n\n")
-        return (score / len(legal_moves), best_move, best_score)
-
-    def get_best_move(self):
-        best_score = None
-        legal_moves = list(self.board.legal_moves)
-        for move in legal_moves:
-            evaluated_score = self.evaluate_move(move)
-            if best_score is None:
-                best_score = evaluated_score
-                best_move = move
-            elif self.board.turn == chess.WHITE and evaluated_score > best_score:
-                best_score = evaluated_score
-                best_move = move
-            elif self.board.turn == chess.BLACK and evaluated_score < best_score:
-                best_score = evaluated_score
-                best_move = move            
-        return best_move
-
-    def visualize_best_move(self, img_size):
-        best_move = self.get_best_move()
-        return chess.svg.board(
-            board=self.board, 
-            arrows=[
-                chess.svg.Arrow(best_move.from_square, best_move.to_square, color="#FF0000cc"),  # Red for our move
-                chess.svg.Arrow(self.game_moves[0].from_square, self.game_moves[0].to_square, color="#00cc00cc"),  # Green for actual move
-                chess.svg.Arrow(self.stockfish_move.from_square, self.stockfish_move.to_square, color="#0000ccFF")  # Blue for Stockfish move
-                ],
-            size=img_size
-            )
+    def two_opp_corners(self, board):
+        # Any combination of 2 opposite corners
+        conditions = [(0, 8), (2, 6)]
+        return any(board[a] == board[b] == "X" for a, b in conditions)
+    
+    def two_adj_corners(self, board):
+        # Any combination of 2 adjacent corners
+        conditions = [(0, 2), (6, 8)], [(0, 6), (2, 8)]
+        return any(board[a] == board[b] == "X" for a, b in conditions)
+    
+    def one_corner(self, board):
+        conditions = [0, 2, 6, 8]
+        return any(board[a] == "X" for a in conditions)
+    
+    def middle(self, board):
+        return board[4] == "X"
+    
+    def two_in_a_row_edge(self, board):
+        conditions = [(0, 1), (1, 2), (0, 3), (2, 5), (3, 6), (5, 8), (6, 7), (7, 8)]
+        return any(board[a] == board[b] == "X" for a, b in conditions)
+    
+    def two_in_a_row_middle(self, board):
+        conditions = [(1, 4), (3, 4), (4, 5), (4, 7)]
+        return any(board[a] == board[b] == "X" for a, b in conditions)
