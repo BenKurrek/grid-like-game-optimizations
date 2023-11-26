@@ -16,6 +16,7 @@ pawn_weight_labels = [
     "Blocked Pawn Weight",
     "Blocked Passed Pawn Weight",
     "Blocked Central Pawn Weight",
+    "Pawn Protected Player Area Weight"
 ]
 pawn_weight_bounds = [
     # Material
@@ -30,6 +31,7 @@ pawn_weight_bounds = [
     (0, 1000), # how much blocked pawns are penalized
     (0, 1000), # how much blocked passed pawns are penalized
     (0, 1000), # how much blocked central pawns are penalized
+    (0, 1000), # how much pawns that protect the player's area are worth
 ]
 
 WHITE_SCORE_IDX = 0
@@ -90,6 +92,11 @@ class PawnEvaluator:
             # If the square is an isolated pawn, give it a penalty
             if self.is_isolated_pawn(square, piece):
                 self.isolated_pawn_evaluation(piece)
+
+            # Count the number of squares that are being protected in the player's area
+            num_protected_squares = self.count_protecting_moves(attack_squares, piece.color)
+            if num_protected_squares > 0:
+                self.pawn_protected_player_area_evaluation(num_protected_squares, piece)
 
     # Add the weight for a pawn
     def material_evaluation(self, piece):
@@ -173,6 +180,11 @@ class PawnEvaluator:
         blocked_central_pawn_idx = 10
         color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
         self.scores_for_weights[blocked_central_pawn_idx][color_idx] -= 1
+
+    def pawn_protected_player_area_evaluation(self, num_squares, piece: chess.Piece):
+        pawn_protected_player_area_idx = 11
+        color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
+        self.scores_for_weights[pawn_protected_player_area_idx][color_idx] += num_squares
 
     # UTILITY
     def check_file_data(self, square, piece):
@@ -268,3 +280,17 @@ class PawnEvaluator:
                     legal_moves += 1
 
         return legal_moves
+
+    def count_protecting_moves(self, attacking_squares, player_color):
+        protecting_moves = 0
+
+        # Define the player's area based on color
+        player_area_ranks = range(1, 5) if player_color == chess.WHITE else range(5, 9)
+
+        for square in attacking_squares:
+            rank = int(square[1]) # square is of form A3 or H6 so the rank is the second character
+            # Check if the attacking square is within the player's area
+            if rank in player_area_ranks:
+                protecting_moves += 1
+
+        return protecting_moves

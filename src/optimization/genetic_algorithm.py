@@ -94,7 +94,7 @@ class GeneticAlgorithm:
 
         print(f"Mutating weights: {weights}")
 
-        weight_indices = random.sample(range(len(weights)), 3)
+        weight_indices = random.sample(range(len(weights)), len(weights)//3)
         for weight_idx in weight_indices:
             weights[weight_idx] = random.uniform(float(weight_bounds[weight_idx][0]), float(weight_bounds[weight_idx][1]))
         
