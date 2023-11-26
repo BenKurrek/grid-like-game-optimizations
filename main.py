@@ -28,7 +28,7 @@ def main():
     
     weights_list = []
     
-    for game_num in range(2):
+    for game_num in range(10):
         best_individual = None
         if algorithm_name == "genetic_algorithm":
             # Create a GeneticAlgorithm instance
@@ -44,11 +44,16 @@ def main():
             # pso.plot_evolution_history()
         weights_list.append(best_individual.get_weights())
     
+    # Combine weights
     combined_weights = weights_list[0]
     for weight_idx in range(len(weights_list[0])):
         combined_weights[weight_idx] = sum([weights_list[i][weight_idx] for i in range(len(weights_list))])/len(weights_list)
     
-    fitness_score, best_move, index, num_moves = create_and_evaluate_game(game_name, combined_weights)
+    evaluations = []
+    # Perform evaluations
+    for evaluation in range(10): 
+        evaluations.append(create_and_evaluate_game(game_name, combined_weights))
+        
     # Use fitness function and rank_move
     
     # best_individual = None
