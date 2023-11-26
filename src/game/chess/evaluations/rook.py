@@ -7,12 +7,14 @@ rook_weight_labels = [
     "Rook Attacking Weight",
     "Rook Defending Weight",
     "Rook number of free spaces",
+    "7th Rank Rook Weight"
 ]
 rook_weight_bounds = [
     (400, 600), # how much the rook is worth
     (0, 1000), # how much rooks that attack the enemy king are worth
     (0, 1000), # how much rooks that defend your king are worth
     (0, 1000), # how much the mobility of rook is worth
+    (0, 1000), # how much rooks on the 7th rank are worth
 ]
 
 WHITE_SCORE_IDX = 0
@@ -35,6 +37,13 @@ class RookEvaluator:
             self.material_evaluation(piece)
             self.king_attacking_defending_evalutation(attack_squares, square, piece)
             self.free_squares_evaluation(attack_squares, piece)
+
+            # Check for rooks on the seventh rank
+            rank = chess.square_rank(square) + 1
+            if piece.color == chess.WHITE and rank == 7:
+                self.rook_on_seventh(piece)
+            if piece.color == chess.BLACK and rank == 2:
+                self.rook_on_seventh(piece)
 
     def material_evaluation(self, piece):
         rook_material_idx = 0
@@ -64,3 +73,7 @@ class RookEvaluator:
         color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
         self.scores_for_weights[free_square_idx][color_idx] += len(rook_attack_squares)
         
+    def rook_on_seventh(self, piece: chess.Piece):
+        rook_on_seventh_idx = 3
+        color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
+        self.scores_for_weights[rook_on_seventh_idx][color_idx] += 1

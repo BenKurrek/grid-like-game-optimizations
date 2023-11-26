@@ -16,7 +16,8 @@ pawn_weight_labels = [
     "Blocked Pawn Weight",
     "Blocked Passed Pawn Weight",
     "Blocked Central Pawn Weight",
-    "Pawn Protected Player Area Weight"
+    "Pawn Protected Player Area Weight",
+    "Rook Behind Passed Pawn Weight",
 ]
 pawn_weight_bounds = [
     # Material
@@ -32,6 +33,7 @@ pawn_weight_bounds = [
     (0, 1000), # how much blocked passed pawns are penalized
     (0, 1000), # how much blocked central pawns are penalized
     (0, 1000), # how much pawns that protect the player's area are worth
+    (0, 1000), # how much rooks that are behind passed pawns are worth
 ]
 
 WHITE_SCORE_IDX = 0
@@ -53,7 +55,7 @@ class PawnEvaluator:
 
     def evaluation_for_square(self, square: chess.Square, piece: chess.Piece, attack_squares: list[str]):
         if piece.piece_type == chess.PAWN:
-            is_double_pawn, is_passed_pawn = self.check_file_data(square, piece)
+            is_double_pawn, is_passed_pawn, protecting_rooks = self.check_file_data(square, piece)
             legal_moves = self.count_legal_pawn_moves(square, piece)
 
             # If the square is a pawn, give it the material bonus
@@ -88,6 +90,9 @@ class PawnEvaluator:
             # If the square is a passed pawn, give it a bonus
             if is_passed_pawn:
                 self.passed_pawn_evaluation(square, piece)
+                
+                if protecting_rooks > 0:
+                    self.protected_passed_pawn_evaluation(protecting_rooks, piece)
 
             # If the square is an isolated pawn, give it a penalty
             if self.is_isolated_pawn(square, piece):
@@ -185,14 +190,22 @@ class PawnEvaluator:
         pawn_protected_player_area_idx = 11
         color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
         self.scores_for_weights[pawn_protected_player_area_idx][color_idx] += num_squares
+    
+    def protected_passed_pawn_evaluation(self, num_rooks, piece: chess.Piece):
+        protected_passed_pawn_idx = 12
+        color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
+        self.scores_for_weights[protected_passed_pawn_idx][color_idx] += num_rooks
 
     # UTILITY
     def check_file_data(self, square, piece):
         is_double_pawn = False
         is_passed_pawn = True
         
-        file = chess.square_file(square)
+        # Check if the pawn is protected from behind by a rook of the same color
+        protecting_rooks = 0
+        direction = 1 if piece.color == chess.WHITE else -1
         
+        file = chess.square_file(square)
         # go through other squares in the same file
         for rank in range(8):
             left_file_idx = file - 1
@@ -205,6 +218,10 @@ class PawnEvaluator:
             cur_file_piece = self.board.piece_at(cur_file_square)
             left_file_piece = None
             right_file_piece = None
+
+            if cur_file_piece is not None and cur_file_piece.piece_type == chess.ROOK and cur_file_piece.color == piece.color:
+                if rank * direction > chess.square_rank(square) * direction:
+                    protecting_rooks += 1
             
             # Make sure files are in bounds
             if left_file_idx >= 0:
@@ -228,7 +245,7 @@ class PawnEvaluator:
             if cur_file_piece is not None and cur_file_piece.piece_type == chess.PAWN and cur_file_piece.color != piece.color:
                 is_passed_pawn = False
 
-        return is_double_pawn, is_passed_pawn
+        return is_double_pawn, is_passed_pawn, protecting_rooks
 
     def is_isolated_pawn(self, square, piece):
         file = chess.square_file(square)
