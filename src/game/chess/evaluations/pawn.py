@@ -144,9 +144,9 @@ class PawnEvaluator:
             
         passed_pawn_idx = 4
         if piece.color == chess.WHITE:
-            self.scores_for_weights[passed_pawn_idx][WHITE_SCORE_IDX] += ranks_until_promotion
+            self.scores_for_weights[passed_pawn_idx][WHITE_SCORE_IDX] += 7 - ranks_until_promotion
         else:
-            self.scores_for_weights[passed_pawn_idx][BLACK_SCORE_IDX] += ranks_until_promotion
+            self.scores_for_weights[passed_pawn_idx][BLACK_SCORE_IDX] += 7 - ranks_until_promotion
          
     def king_attacking_defending_evalutation(self, pawn_attack_squares, square: chess.Square, piece: chess.Piece):
         attacking_pawn_idx = 5
@@ -296,6 +296,7 @@ class PawnEvaluator:
                 if self.board.is_legal(chess.Move(square, capture_square)):
                     legal_moves += 1
 
+        print(f"Legal moves for {piece} at {chess.square_name(square)}: {legal_moves}")
         return legal_moves
 
     def count_protecting_moves(self, attacking_squares, player_color):
