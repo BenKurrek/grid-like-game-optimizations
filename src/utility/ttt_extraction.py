@@ -32,8 +32,8 @@ def minimax(board, player, max_player, original_board):
 
         undo_move(board, possible_move)
         moves_and_scores.append((possible_move, sim_score['score']))
-        print("sim_score: {}".format(sim_score))
-        print(moves_and_scores)
+        #print("sim_score: {}".format(sim_score))
+        #print(moves_and_scores)
 
         if player == max_player:  # X is max player
             if sim_score['score'] > best['score']:
@@ -100,7 +100,7 @@ def extract_random_ttt_positions(num_positions):
     for _ in range(num_positions):
         # Choose a random game, currently represented as a line in a csv file
         board = [item.replace('\n', ' ').strip() if item.strip() != '' else ' ' for item in  random.choice(games).split(",")]
-        #board = ['', 'O', 'X', 'O', 'O', 'X', 'X', '', '']
+        #board = ['', 'X', '', 'O', '', '', '', '', '']
         print(board)
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         moves_and_scores = minimax(board, player="X", max_player="X", original_board=board)

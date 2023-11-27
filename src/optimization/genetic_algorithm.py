@@ -4,6 +4,8 @@ from src.utility.othello_extraction import extract_random_othello_positions
 from src.utility.game_chooser import create_base_game
 import matplotlib.pyplot as plt
 
+from colorama import Fore, Back, Style
+
 from src.utility.ttt_extraction import extract_random_ttt_positions
 
 class GeneticAlgorithm:
@@ -116,12 +118,13 @@ class GeneticAlgorithm:
 
     def evolve(self, generations, target_fitness=None):
         for generation in range(generations):
+            print(f"{Fore.CYAN}~~~~~~~~~~~~~~~~~~~~   GENERATION: {generation + 1}   ~~~~~~~~~~~~~~~~~~~~{Style.RESET_ALL}")
             fitness_scores = []
             # Evaluate the fitness scores of each individual in the population
             for individual in self.population:
                 fitness_score, best_move, best_score = individual.fitness()
                 fitness_scores.append((individual, (fitness_score, best_move, best_score)))
-               # print(f"Chosen Move: {best_move}. Evaluated Score: {best_score}. Fitnesss: {fitness_score}")
+                print(f"Chosen Move: {best_move}. Evaluated Score: {best_score}. Fitnesss: {fitness_score}")
             
             # Sort to get the top fitness scores for the next generation
             fitness_scores.sort(key=lambda x: x[1][0], reverse=True)
@@ -160,7 +163,9 @@ class GeneticAlgorithm:
             })
             self.weight_history.append(best_individual.get_weights())
 
-            print(f"\nGeneration {generation + 1}, Best Fitness: {best_fitness_score}, Best Move: {best_move} with rank: {best_move_rank}")
+            print(f"\n{Fore.GREEN}Generation {generation + 1}, Best Fitness: {best_fitness_score}, Best Move: {best_move} with rank: {best_move_rank}{Style.RESET_ALL}")
+            print(f"{Fore.BLUE}Fitness scores: fitness score, best move, predicted best minimax score{Style.RESET_ALL}")
+            print(f"{Fore.BLUE}All fitness scores: {[score for _, score in fitness_scores]}{Style.RESET_ALL}")
             print(f"Weights: {best_individual.get_weights()}\n")
 
         self.weight_labels = best_individual.get_weight_labels()

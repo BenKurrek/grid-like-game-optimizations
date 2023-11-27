@@ -4,6 +4,7 @@ import configparser
 import io
 import os
 from PIL import Image
+from colorama import Fore, Style
 from src.game.base_game import BaseGame
 from src.optimization.genetic_algorithm import GeneticAlgorithm
 from src.optimization.pso import PSO
@@ -17,6 +18,8 @@ def read_config(file_path="config.ini"):
 def main():
     # Read configuration from the file
     config = read_config()
+    print(f"{Fore.MAGENTA}~~~~~~~~~~~~~~~~~~~~   STARTING ALGORITHM   ~~~~~~~~~~~~~~~~~~~~{Style.RESET_ALL}")
+
 
     # Access game and algorithm choices
     game_name = config.get("Game", "name")
@@ -29,11 +32,17 @@ def main():
     best_individual = None
     if algorithm_name == "genetic_algorithm":
         # Create a GeneticAlgorithm instance
-        genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.5)
 
         # Evolve the population for a certain number of generations
-        best_individual = genetic_algorithm.evolve(generations=400)
-        genetic_algorithm.plot_evolution_history()
+        if game_name == "tictactoe":
+            genetic_algorithm = GeneticAlgorithm(game_name, population_size=4, mutation_rate=0.1)
+            generations = 3
+        else:
+            genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.5)
+            generations = 400
+
+        best_individual = genetic_algorithm.evolve(generations=generations)
+        #genetic_algorithm.plot_evolution_history()
     elif algorithm_name == "pso":
         pso = PSO(game_name, num_particles=10)
         # Evolve the population for a certain number of generations
