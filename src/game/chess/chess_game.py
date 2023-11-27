@@ -142,26 +142,18 @@ class ChessGame(BaseGame):
     def evaluate_move(self, move):
         new_board = self.board.copy()
 
-        if move.uci() == "a6c5":
+        debug = False
+        if debug:
             print("INITIAL!")
-        initial_score = self.score_board_state(new_board, move.uci() == "a6c5")
+        initial_score = self.score_board_state(new_board, debug)
 
         # Push the desired moves and then also the move that stockfish would make in retaliation
         for next_move in self.move_sequences[str(move)]['next_moves']:
             new_board.push(chess.Move.from_uci(next_move.uci()))
     
-        if move.uci() == "a6c5":
+        if debug:
             print("FINAL!")
-        final_score = self.score_board_state(new_board, move.uci() == "a6c5")
-
-        # DEBUGGING
-        #if move == self.stockfish_move:
-            #print(f"Evaluation of stockfish move: {move} -> Score: {score}")
-        #if move == self.gm_move:
-            #print(f"Evaluation of gm move: {move} -> Score: {score}")
-
-        #print(f"Turn: {self.turn}, Move: {move.uci()} Initial Score: {initial_score}, Final Score: {final_score}, Difference: {final_score - initial_score}\n")
-
+        final_score = self.score_board_state(new_board, debug)
         return final_score - initial_score
     
     # Fitness is defined as the average difference between the actual stockfish score and the evaluated score

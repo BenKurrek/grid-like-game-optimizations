@@ -7,7 +7,7 @@ import time
 
 # Evaluate the score of every legal move (and get the next best move)
 def stockfish_evaluation(board):
-    two_ply_moves = 1
+    two_ply_moves = 4
 
     engine = chess.engine.SimpleEngine.popen_uci("./stockfish")
     move_sequences = {}
