@@ -1,5 +1,6 @@
 # main.py
 
+import sys
 import configparser
 import io
 import os
@@ -16,6 +17,15 @@ def read_config(file_path="config.ini"):
     return config
 
 def main():
+    # Parse command-line arguments
+    args = sys.argv[1:]
+
+    # Extract seed value if provided
+    seed = None
+    for arg in args:
+        if arg.startswith("seed="):
+            seed = int(arg.split("=")[1])
+
     # Read configuration from the file
     config = read_config()
     print(f"{Fore.MAGENTA}~~~~~~~~~~~~~~~~~~~~   STARTING ALGORITHM   ~~~~~~~~~~~~~~~~~~~~{Style.RESET_ALL}")
@@ -43,6 +53,11 @@ def main():
 
         best_individual = genetic_algorithm.evolve(generations=generations)
         #genetic_algorithm.plot_evolution_history()
+        genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.5, seed=seed)
+
+        # Evolve the population for a certain number of generations
+        best_individual = genetic_algorithm.evolve(generations=500)
+        genetic_algorithm.plot_evolution_history()
     elif algorithm_name == "pso":
         if game_name == "tictactoe":
             pso = PSO(game_name, num_particles=2)
