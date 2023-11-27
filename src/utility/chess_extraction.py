@@ -59,7 +59,7 @@ def stockfish_evaluation(board):
     print(f"Best Moves: {best_moves_ascending}")
     return (move_sequences, ranked_moves)
 
-def extract_random_chess_positions(num_positions):
+def extract_random_chess_positions(num_positions, seed):
     # Load the games from the PGN file
     games = []
     with open('./src/utility/master_games.pgn') as file:
@@ -73,7 +73,14 @@ def extract_random_chess_positions(num_positions):
     # Extract random positions
     for _ in range(num_positions):
         # Choose a random game
+        if seed is None:
+            seed = random.randint(0, 1000000)
+        
+        print(f"Seed used: {seed}")
+        random.seed(seed)
+
         random_game = random.choice(games)
+        print(f"Game: {random_game.headers['Event']}")
 
         # Traverse the game to a random position
         board = random_game.board()
@@ -89,6 +96,7 @@ def extract_random_chess_positions(num_positions):
         # print(f"Position: {board.fen()}")
         # print(f"Turn: {'White' if board.turn == chess.WHITE else 'Black'}")
         # print(f"Next Move (IN EXTRACTION): {board_moves[0] if board_moves else 'Game Over'}\n")
-        board_data.append((board, board_moves, move_sequences, ranked_moves))
+        board_data.append((board, board_moves, move_sequences, ranked_moves, {}))
+
 
     return board_data

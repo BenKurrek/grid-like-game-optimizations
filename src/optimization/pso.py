@@ -173,7 +173,7 @@ class PSO():
         
         
         
-    def iterate(self, iterations, target_fitness=None):
+    def iterate(self, iterations, target_fitness=None) -> BaseGame:
         for i in range(iterations):
             fitness_scores = []
             # Evaluate the fitness scores of each individual in the population
