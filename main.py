@@ -44,7 +44,10 @@ def main():
         best_individual = genetic_algorithm.evolve(generations=generations)
         #genetic_algorithm.plot_evolution_history()
     elif algorithm_name == "pso":
-        pso = PSO(game_name, num_particles=10)
+        if game_name == "tictactoe":
+            pso = PSO(game_name, num_particles=2)
+        else:
+            pso = PSO(game_name, num_particles=10)
         # Evolve the population for a certain number of generations
         best_individual = pso.iterate(iterations=10)
         pso.plot_evolution_history()

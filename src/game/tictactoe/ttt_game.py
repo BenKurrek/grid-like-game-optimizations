@@ -9,25 +9,25 @@ from itertools import permutations
 import json
 
 weight_labels = [
-    "3-corner",
     "2-adjacent-corner",
     "2-opposite-corner",
     "1-corner",
     "middle",
-    "2-in-a-row-edge",
-    "2-in-a-row-center",
 ]
 weight_bounds = [
-    (-100, 100), # Holding 3 corners
-    (-100, 100), # Holding 2 adjacent corners
-    (-100, 100), # Holding 2 opposite corners
-    (-100, 100), # Holding 1 corner
-    (-100, 100), # Holding middle
-    (-100, 100), # Holding two in a row edge
-    (-100, 100), # Holding two in a row center
+    (-10000, 10000), # Holding 2 adjacent corners
+    (-10000, 10000), # Holding 2 opposite corners
+    (-10000, 10000), # Holding 1 corner
+    (-10000, 10000), # Holding middle
 ]
 
 class tttGame(BaseGame):
+    # "3-corner",
+    # "2-in-a-row-edge",
+    # "2-in-a-row-center",
+    # (-10000, 10000), # Holding 3 corners
+#     (-10000, 10000), # Holding two in a row edge
+#     (-10000, 10000), # Holding two in a row center
     def __init__(self, meta):
         board, moves_and_scores = meta
 
@@ -121,13 +121,13 @@ class tttGame(BaseGame):
         two_in_a_row_edge_score = self.two_in_a_row_edge(new_board)
         two_in_a_row_middle_score = self.two_in_a_row_middle(new_board)
         initial_score = (
-            self.weights[0] * three_corners_score +
-            self.weights[1] * two_adj_corners_score +
-            self.weights[2] * two_opp_corners_score +
-            self.weights[3] * one_corner_score +
-            self.weights[4] * middle_score +
-            self.weights[5] * two_in_a_row_edge_score +
-            self.weights[6] * two_in_a_row_middle_score
+            self.weights[0] * two_adj_corners_score +
+            self.weights[1] * two_opp_corners_score +
+            self.weights[2] * one_corner_score +
+            self.weights[3] * middle_score 
+            # self.weights[0] * three_corners_score +
+            # self.weights[5] * two_in_a_row_edge_score +
+            # self.weights[6] * two_in_a_row_middle_score
         )
 
         make_move(new_board, move, "X")
@@ -140,13 +140,13 @@ class tttGame(BaseGame):
         two_in_a_row_edge_score = self.two_in_a_row_edge(new_board)
         two_in_a_row_middle_score = self.two_in_a_row_middle(new_board)
         final_score = (
-            self.weights[0] * three_corners_score +
-            self.weights[1] * two_adj_corners_score +
-            self.weights[2] * two_opp_corners_score +
-            self.weights[3] * one_corner_score +
-            self.weights[4] * middle_score +
-            self.weights[5] * two_in_a_row_edge_score +
-            self.weights[6] * two_in_a_row_middle_score
+            self.weights[0] * two_adj_corners_score +
+            self.weights[1] * two_opp_corners_score +
+            self.weights[2] * one_corner_score +
+            self.weights[3] * middle_score 
+            # self.weights[0] * three_corners_score +
+            # self.weights[5] * two_in_a_row_edge_score +
+            # self.weights[6] * two_in_a_row_middle_score
         )
 
         return final_score - initial_score
