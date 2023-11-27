@@ -87,7 +87,6 @@ class GeneticAlgorithm:
         elif self.game_name == "tictactoe":
             print("Tic Tac Toe")
             board_data = extract_random_ttt_positions(num_positions=1)[0]
-            print(board_data)
             return[create_base_game(self.game_name, board_data) for _ in range(self.population_size)]
             # self.game = Othello( )  # Replace with actual Othello initialization
         elif self.game_name == "othello":
@@ -133,8 +132,8 @@ class GeneticAlgorithm:
             for individual in self.population:
                 fitness_score, best_move, best_score = individual.fitness()
                 fitness_scores.append((individual, (fitness_score, best_move, best_score)))
-                print(f"Chosen Move: {best_move}. Evaluated Score: {best_score}. Fitnesss: {fitness_score}")
-            
+
+
             # Sort to get the top fitness scores for the next generation
             fitness_scores.sort(key=lambda x: x[1][0], reverse=True)
             best_individual, best_fitness_data = fitness_scores[0]
@@ -164,6 +163,11 @@ class GeneticAlgorithm:
             self.population = new_population
 
             best_move_rank = best_individual.rank_move(best_move)
+            print(f"Best Fitness Score: {best_fitness_score}")
+            print(f"Best Move: {best_move}")
+            print(f"Best Score: {best_score}")
+            print(f"Best Move Rank: {best_move_rank}")
+
             self.history.append({
                 "best_fitness": best_fitness_score,
                 "best_move": best_move,
@@ -173,9 +177,6 @@ class GeneticAlgorithm:
             self.weight_history.append(best_individual.get_weights())
 
             print(f"\n{Fore.GREEN}Generation {generation + 1}, Best Fitness: {best_fitness_score}, Best Move: {best_move} with rank: {best_move_rank}{Style.RESET_ALL}")
-            print(f"{Fore.BLUE}Fitness scores: fitness score, best move, predicted best minimax score{Style.RESET_ALL}")
-            print(f"{Fore.BLUE}All fitness scores: {[score for _, score in fitness_scores]}{Style.RESET_ALL}")
-            print(f"Weights: {best_individual.get_weights()}\n")
 
         self.weight_labels = best_individual.get_weight_labels()
         self.weight_bounds = best_individual.get_weight_bounds()

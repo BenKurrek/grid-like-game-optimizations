@@ -15,10 +15,10 @@ weight_labels = [
     "middle",
 ]
 weight_bounds = [
-    (-10000, 10000), # Holding 2 adjacent corners
-    (-10000, 10000), # Holding 2 opposite corners
-    (-10000, 10000), # Holding 1 corner
-    (-10000, 10000), # Holding middle
+    (-10, 10), # Holding 2 adjacent corners
+    (-10, 10), # Holding 2 opposite corners
+    (-10, 10), # Holding 1 corner
+    (-10, 10), # Holding middle
 ]
 
 class tttGame(BaseGame):
@@ -44,10 +44,15 @@ class tttGame(BaseGame):
         return [self.board, self.moves_and_scores]
 
     def rank_move(self, move):
-        rank = 0;
-        for move_score in self.moves_and_scores:
-            if move_score[0] == move:
-                rank = move_score[1]
+        print(f"SELFELAFS:LSAFKLSAFASF {self.moves_and_scores}")
+        print(move)
+
+        rank = 1
+        for v in self.moves_and_scores:
+            if v[0] == move:
+                return (rank, len(list(self.moves_and_scores)))
+            rank += 1
+        
         return (rank, len(list(self.moves_and_scores)))
 
     def get_weights(self):
@@ -74,42 +79,30 @@ class tttGame(BaseGame):
     
     # Cost is the minimax difference between the actual best move and the predicted best move
     def fitness(self):
-        # best score from determine_best_move_from_weights is internal score (weights * features)
-        (predicted_best_move, best_score) = self.determine_best_move_from_weights()
-
-        minimax_best_score = -math.inf
-        for move in self.moves_and_scores:
-            # Get ACTUAL best move according to minimax
-            if move[1] > minimax_best_score:
-                minimax_best_score = move[1]
-                minimax_best_move = move[0]
-
-            # Get the score the the predicted best move
-            if move[0] == predicted_best_move:
-                predicted_best_minimax_score = move[1]
+        score = 0
         
-        print(f"predicted {predicted_best_move}")
-        print(f"predicted score {predicted_best_minimax_score}")
-        # maximize predicted - actual, in this case trying to get it to 0
-        return predicted_best_minimax_score - minimax_best_score, predicted_best_move, predicted_best_minimax_score
-    
-    def determine_best_move_from_weights(self):
         # start with random guesses
         best_move = available_moves(self.board)[0]
         best_score = -math.inf
 
-        move_scores = list()
-
-        for move in available_moves(self.board):
+        avail_moves = available_moves(self.board)
+        for move in avail_moves:
             # evaluate a score for each weight
-            score = self.evaluate_move(move)
-            if score > best_score:
+            evaluated_score = self.evaluate_move(move)
+            # filter through self.moves_and_scores to get the index of the tuple whose index 0 is the move
+            # then get the score from that tuple
+            minimax_score = 0
+            for v in self.moves_and_scores:
+                if v[0] == move:
+                    minimax_score = v[1]          
+            
+            if evaluated_score > best_score:
                 best_move = move
-                best_score = score
-            move_scores.append((move, score))
-        print("calculated scores: {}".format(move_scores))
-        return best_move, best_score
+                best_score = evaluated_score
 
+            score -= abs(minimax_score - evaluated_score)
+        return (score / len(avail_moves), best_move, best_score)
+    
     def evaluate_move(self, move):
         new_board = self.board.copy()
         
