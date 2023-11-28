@@ -46,17 +46,17 @@ def main():
         # Evolve the population for a certain number of generations
         if game_name == "tictactoe":
             genetic_algorithm = GeneticAlgorithm(game_name, population_size=4, mutation_rate=0.1)
-            generations = 3
+            generations = 500
         else:
             genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.5)
-            generations = 400
+            generations = 500
 
         best_individual = genetic_algorithm.evolve(generations=generations)
         #genetic_algorithm.plot_evolution_history()
         genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.5, seed=seed)
 
         # Evolve the population for a certain number of generations
-        best_individual = genetic_algorithm.evolve(generations=500)
+        best_individual = genetic_algorithm.evolve(generations=generations)
         genetic_algorithm.plot_evolution_history()
     elif algorithm_name == "pso":
         if game_name == "tictactoe":

@@ -7,8 +7,8 @@ def create_base_game(game_name, game_meta):
     elif game_name == "tictactoe":
         from src.game.tictactoe.ttt_game import tttGame
         game = tttGame(game_meta)
-        print(game.get_board_data())
-        print(game.ranked_moves)
+        # print(game.get_board_data())
+        # print(game.ranked_moves)
         return game  # Replace with actual Othello initialization
     elif game_name == "othello":
         from src.game.othello.othello_game import OthelloGame
