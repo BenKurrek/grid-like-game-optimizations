@@ -7,7 +7,7 @@ import time
 
 # Evaluate the score of every legal move (and get the next best move)
 def stockfish_evaluation(board):
-    two_ply_moves = 1
+    two_ply_moves = 4
 
     engine = chess.engine.SimpleEngine.popen_uci("./stockfish")
     move_sequences = {}
@@ -19,10 +19,10 @@ def stockfish_evaluation(board):
         # Find the next two moves and evaluate the score
         principle_moveset = []
         score = None
-        time_to_find_moveset = 0.1
+        time_to_find_moveset = 5
         
         while len(principle_moveset) < two_ply_moves * 2:
-            info = engine.analyse(board, chess.engine.Limit(time=0.1), root_moves=[move])
+            info = engine.analyse(board, chess.engine.Limit(time=time_to_find_moveset, depth=20), root_moves=[move])
             principle_moveset = info['pv']
             score = info['score']
             time_to_find_moveset += 0.1

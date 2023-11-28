@@ -144,9 +144,9 @@ class PawnEvaluator:
             
         passed_pawn_idx = 4
         if piece.color == chess.WHITE:
-            self.scores_for_weights[passed_pawn_idx][WHITE_SCORE_IDX] += ranks_until_promotion
+            self.scores_for_weights[passed_pawn_idx][WHITE_SCORE_IDX] += 7 - ranks_until_promotion
         else:
-            self.scores_for_weights[passed_pawn_idx][BLACK_SCORE_IDX] += ranks_until_promotion
+            self.scores_for_weights[passed_pawn_idx][BLACK_SCORE_IDX] += 7 - ranks_until_promotion
          
     def king_attacking_defending_evalutation(self, pawn_attack_squares, square: chess.Square, piece: chess.Piece):
         attacking_pawn_idx = 5
@@ -275,17 +275,19 @@ class PawnEvaluator:
         legal_moves = 0
         direction = 1 if piece.color == chess.WHITE else -1
 
-        # Check one square forward
+        temp_board = self.board.copy()
+        temp_board.turn = piece.color
+
         target_square_1 = square + 8 * direction
         if chess.square_rank(target_square_1) in range(1, 9):
-            if self.board.is_legal(chess.Move(square, target_square_1)):
+            if temp_board.is_legal(chess.Move(square, target_square_1)):
                 legal_moves += 1
 
                 # Check two squares forward if it's the pawn's first move
                 target_square_2 = square + 16 * direction
                 if (
                     chess.square_rank(square) in {1, 6}
-                    and self.board.is_legal(chess.Move(square, target_square_2))
+                    and temp_board.is_legal(chess.Move(square, target_square_2))
                 ):
                     legal_moves += 1
 
@@ -293,7 +295,7 @@ class PawnEvaluator:
         for file_offset in [-1, 1]:
             capture_square = square + (8 * direction) + file_offset
             if chess.square_file(capture_square) in range(1, 9):
-                if self.board.is_legal(chess.Move(square, capture_square)):
+                if temp_board.is_legal(chess.Move(square, capture_square)):
                     legal_moves += 1
 
         return legal_moves
