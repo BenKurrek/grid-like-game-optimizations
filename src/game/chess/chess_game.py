@@ -11,7 +11,6 @@ from src.game.chess.evaluations.pawn import PawnEvaluator, pawn_weight_bounds, p
 from src.game.chess.evaluations.bishop import BishopEvaluator, bishop_weight_bounds, bishop_weight_labels
 from src.game.chess.evaluations.king import KingEvaluator, king_weight_bounds, king_weight_labels
 
-import json
 
 class ChessGame(BaseGame):
     def __init__(self, meta):
