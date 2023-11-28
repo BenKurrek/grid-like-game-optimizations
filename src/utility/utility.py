@@ -14,7 +14,7 @@ def create_and_evaluate_game(game_name, weights) -> tuple[float, chess.Move, int
         board_data = extract_random_chess_positions(num_positions=1)[0]
         # Create the population given the set of initial individuals
     elif game_name == "othello":
-        board_data = extract_random_othello_positions(num_positions=1)[0]
+        board_data = extract_random_othello_positions(num_positions=1, dataset="test")[0]
         
     game = create_base_game(game_name, board_data)
     
