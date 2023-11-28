@@ -45,8 +45,8 @@ def main():
 
         # Evolve the population for a certain number of generations
         if game_name == "tictactoe":
-            genetic_algorithm = GeneticAlgorithm(game_name, population_size=4, mutation_rate=0.1)
-            generations = 500
+            genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.5)
+            generations = 20
         else:
             genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.5)
             generations = 500

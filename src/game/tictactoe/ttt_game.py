@@ -101,11 +101,13 @@ class tttGame(BaseGame):
             if evaluated_score > best_score:
                 best_move = move
                 best_score = evaluated_score
+            
+            score -= abs(minimax_score - evaluated_score)
 
         # TODO: Confirm with Ben that this is the correct way to calculate score and fitness
         # TODO: Merge chess fix
-        score -= abs(minimax_score - evaluated_score)
-        return (score / len(avail_moves), best_move, best_score)
+        # genetic algorithm is looking for maximum score, this is driving the score down when there is a difference between minimax and evaluated
+        return (score/len(avail_moves), best_move, best_score)
     
     def evaluate_move(self, move):
         new_board = self.board.copy()

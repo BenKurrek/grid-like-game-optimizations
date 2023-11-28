@@ -127,7 +127,7 @@ class GeneticAlgorithm:
 
     def evolve(self, generations, target_fitness=None) -> BaseGame:
         for generation in range(generations):
-            if not (generation + 1) % 100:
+            if not (generation + 1) % 10:
                 print(f"{Fore.CYAN}~~~~~~~~~~~~~~~~~~~~   GENERATION: {generation + 1}   ~~~~~~~~~~~~~~~~~~~~{Style.RESET_ALL}")
             fitness_scores = []
             # Evaluate the fitness scores of each individual in the population
@@ -165,7 +165,7 @@ class GeneticAlgorithm:
             self.population = new_population
 
             best_move_rank = best_individual.rank_move(best_move)
-            if not (generation + 1) % 100:
+            if not (generation + 1) % 10:
                 print(f"Best Fitness Score: {best_fitness_score}")
                 print(f"Best Move: {best_move}")
                 print(f"Best Score: {best_score}")
@@ -179,7 +179,7 @@ class GeneticAlgorithm:
             })
             self.weight_history.append(best_individual.get_weights())
 
-            if not (generation + 1) % 100:
+            if not (generation + 1) % 10:
                 print(f"\n{Fore.GREEN}Generation {generation + 1}, Best Fitness: {best_fitness_score}, Best Move: {best_move} with rank: {best_move_rank}{Style.RESET_ALL}")
 
         self.weight_labels = best_individual.get_weight_labels()

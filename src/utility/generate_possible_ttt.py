@@ -29,7 +29,7 @@ def check_conditions(combo):
     ]
 
     # Number of X and O equal, so that X is next move
-    return all(x_conditions) and all(o_conditions) and count_o == 2 and count_x == 1
+    return all(x_conditions) and all(o_conditions) and count_o == 3 and count_x == 2
 
 # Define the possible values for each space
 options = [" ", "X", "O"]
