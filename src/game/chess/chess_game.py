@@ -24,7 +24,7 @@ class ChessGame(BaseGame):
         self.turn = "White" if self.board.turn == chess.WHITE else "Black"
         self.stockfish_move = self.move_sequences['stockfish']['move']
         self.stockfish_score = self.move_sequences['stockfish']['score']
-        self.gm_move = self.game_moves[0]
+        self.gm_move = self.game_moves[0] if len(self.game_moves) > 0 else None
 
         self.initialize_random_weights()
 
