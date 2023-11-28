@@ -14,7 +14,7 @@ bishop_weight_bounds = [
     (0, 50), # how much pawns that attack the enemy king are worth
     (0, 50), # how much pawns that defend your king are worth
     (0, 100), # how much the mobility of the bishop is worth
-    (0, 100), # how much bishop pairs are worth
+    (0, 50), # how much bishop pairs are worth
 ]
 
 WHITE_SCORE_IDX = 0
@@ -38,6 +38,10 @@ class BishopEvaluator:
 
             self.material_evaluation(piece)
             self.king_attacking_defending_evalutation(square, piece, attack_squares)
+            self.free_squares_evaluation(attack_squares, piece)
+            
+            if has_bishop_pair:
+                self.bishop_pair_evaluation(piece)
 
     def material_evaluation(self, piece):
         bishop_material_idx = 0
@@ -67,6 +71,11 @@ class BishopEvaluator:
         free_square_idx = 3
         color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
         self.scores_for_weights[free_square_idx][color_idx] += len(bishop_attack_squares)
+
+    def bishop_pair_evaluation(self, piece: chess.Piece):
+        bishop_pair_idx = 4
+        color_idx = WHITE_SCORE_IDX if piece.color is chess.WHITE else BLACK_SCORE_IDX
+        self.scores_for_weights[bishop_pair_idx][color_idx] += 1
 
     #UTILITY
     def has_bishop_pair(self, piece):

@@ -8,6 +8,7 @@ from PIL import Image
 from colorama import Fore, Style
 from src.game.base_game import BaseGame
 from src.optimization.genetic_algorithm import GeneticAlgorithm
+from src.optimization.simulated_annealing import SimulatedAnnealing
 from src.optimization.pso import PSO
 
 def read_config(file_path="config.ini"):
@@ -53,7 +54,7 @@ def main():
 
         best_individual = genetic_algorithm.evolve(generations=generations)
         #genetic_algorithm.plot_evolution_history()
-        genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.5, seed=seed)
+        genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.8, seed=seed)
 
         # Evolve the population for a certain number of generations
         best_individual = genetic_algorithm.evolve(generations=generations)
@@ -66,7 +67,12 @@ def main():
         # Evolve the population for a certain number of generations
         best_individual = pso.iterate(iterations=10)
         pso.plot_evolution_history()
-        
+    elif algorithm_name == "simulated_annealing":
+        simulated_annealing = SimulatedAnnealing(game_name, temperature=1, seed=seed)
+
+        best_individual = simulated_annealing.iterate(iterations_per_temp=5)
+        simulated_annealing.plot_evolution_history()
+
 
     if game_name == "chess":
         import cairosvg

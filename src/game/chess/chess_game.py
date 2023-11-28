@@ -11,7 +11,6 @@ from src.game.chess.evaluations.pawn import PawnEvaluator, pawn_weight_bounds, p
 from src.game.chess.evaluations.bishop import BishopEvaluator, bishop_weight_bounds, bishop_weight_labels
 from src.game.chess.evaluations.king import KingEvaluator, king_weight_bounds, king_weight_labels
 
-import json
 
 class ChessGame(BaseGame):
     def __init__(self, meta):
@@ -114,41 +113,46 @@ class ChessGame(BaseGame):
         self.eval_count_cache[str(board)] = eval_count_for_weight
         return eval_count_for_weight
 
-    def score_board_state(self, board):
+    def score_board_state(self, board, debug=False):
         eval_count_for_weight = self.eval_count_from_cache(board)
+        labels = self.get_weight_labels()
 
         white_score = 0
         black_score = 0
         # Sum the scores for each weight
+        idx = 0
         for piece_type, eval_counts in enumerate(eval_count_for_weight):
             piece_weights = self.weight_for_eval_counts[piece_type]
 
-            for weight_idx, eval_count_for_weight in enumerate(eval_counts):
+            for weight_idx, evals in enumerate(eval_counts):
                 weight = piece_weights[weight_idx]
 
-                white_score += weight * eval_count_for_weight[0]
-                black_score += weight * eval_count_for_weight[1]
+                white_score += weight * evals[0]
+                black_score += weight * evals[1]
 
+                if debug:
+                    print(f"Label: {labels[idx]}      White: {evals[0]}     Black: {evals[1]}")
+                idx += 1
+        if debug:
+            print(f"White Score {white_score}")
+            print(f"Black Score {black_score}\n\n\n")
         return white_score - black_score
 
     def evaluate_move(self, move):
         new_board = self.board.copy()
-        initial_score = self.score_board_state(new_board)
+
+        debug = False
+        if debug:
+            print("INITIAL!")
+        initial_score = self.score_board_state(new_board, debug)
 
         # Push the desired moves and then also the move that stockfish would make in retaliation
         for next_move in self.move_sequences[str(move)]['next_moves']:
             new_board.push(chess.Move.from_uci(next_move.uci()))
     
-        final_score = self.score_board_state(new_board)
-        
-        # DEBUGGING
-        #if move == self.stockfish_move:
-            #print(f"Evaluation of stockfish move: {move} -> Score: {score}")
-        #if move == self.gm_move:
-            #print(f"Evaluation of gm move: {move} -> Score: {score}")
-
-        #print(f"Turn: {self.turn}, Move: {move.uci()} Initial Score: {initial_score}, Final Score: {final_score}, Difference: {final_score - initial_score}\n")
-
+        if debug:
+            print("FINAL!")
+        final_score = self.score_board_state(new_board, debug)
         return final_score - initial_score
     
     # Fitness is defined as the average difference between the actual stockfish score and the evaluated score

@@ -99,11 +99,11 @@ class GeneticAlgorithm:
             raise ValueError("Invalid game name. Supported options: chess, othello, go")
 
     def mutate(self, game):
-        # Randomly choose 3 weights to mutate
+        # Randomly choose 1 weights to mutate
         weights = game.get_weights()
         weight_bounds = game.get_weight_bounds()
 
-        weight_indices = random.sample(range(len(weights)), len(weights)//3)
+        weight_indices = random.sample(range(len(weights)), 1)
         for weight_idx in weight_indices:
             weights[weight_idx] = random.uniform(float(weight_bounds[weight_idx][0]), float(weight_bounds[weight_idx][1]))
         
