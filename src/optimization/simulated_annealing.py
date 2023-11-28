@@ -37,24 +37,24 @@ class SimulatedAnnealing:
         history = self.history
         weight_history = self.weight_history
 
-        generations = range(1, len(history) + 1)
+        iterations = range(1, len(history) + 1)
         best_fitness_values = [entry["best_fitness"] for entry in history]
 
         # Figure 1: Best Fitness and Best Move Rank
         fig1, axes1 = plt.subplots(1, 2, figsize=(18, 6))  # 1 row, 2 columns
         # Plotting best fitness values
-        axes1[0].plot(generations, best_fitness_values, marker='o')
+        axes1[0].plot(iterations, best_fitness_values, marker='o')
         axes1[0].set_title(f'Best Fitness. Seed={self.seed}')
-        axes1[0].set_xlabel('Generation')
+        axes1[0].set_xlabel('Iteration')
         axes1[0].set_ylabel('Fitness')
 
         # Plotting best move rank over time
         best_move_rank_values = [entry["best_move_rank"][0] for entry in history]
         max_moves = history[0]["best_move_rank"][1]
 
-        axes1[1].plot(generations, best_move_rank_values, marker='o')
+        axes1[1].plot(iterations, best_move_rank_values, marker='o')
         axes1[1].set_title('Rank of Best Move')
-        axes1[1].set_xlabel('Generation')
+        axes1[1].set_xlabel('Iteration')
         axes1[1].set_ylabel('Rank')
         axes1[1].set_ylim(1, max_moves)
 
@@ -76,9 +76,9 @@ class SimulatedAnnealing:
                 row_index = (i - start_index) // columns_per_figure
                 col_index = (i - start_index) % columns_per_figure
 
-                axes[row_index, col_index].plot(generations, weights_values, marker='o')
+                axes[row_index, col_index].plot(iterations, weights_values, marker='o')
                 axes[row_index, col_index].set_title(f'{self.weight_labels[i]}')
-                axes[row_index, col_index].set_xlabel('Generation')
+                axes[row_index, col_index].set_xlabel('Iteration')
                 axes[row_index, col_index].set_ylabel(f'Weight')
                 axes[row_index, col_index].set_ylim(self.weight_bounds[i][0], self.weight_bounds[i][1])
 
@@ -93,8 +93,24 @@ class SimulatedAnnealing:
     
     def decrease_temp_geometrically(self, t, alpha):
         return t * alpha
+    
+    def get_random_weight_neighbour(self):
+        def get_random_value(lower, upper):
+            return random.uniform(float(lower), float(upper))
 
-    def iterate(self, iterations, target_fitness=None):
+        def get_neighbour(value, lower, upper):
+            min_val = max(value - 0.01 * abs(upper - lower), lower)
+            max_val = min(value + 0.01 * abs(upper - lower), upper)
+            return get_random_value(min_val, max_val)
+
+        neighbour_weights = []
+        
+        for weight, (lower, upper) in zip(self.candidate.get_weights(), self.candidate.get_weight_bounds()):
+            neighbour_weights.append(get_neighbour(weight, lower, upper))
+
+        return neighbour_weights
+
+    def iterate(self, iterations_per_temp, target_fitness=None):
         cur_temp = self.temperature
 
         counter = 0
@@ -103,13 +119,18 @@ class SimulatedAnnealing:
         best_weights = self.candidate.get_weights()
         
         while cur_temp >= 10**(-100):            
-            for _ in range(iterations):
+            for _ in range(iterations_per_temp):
                 counter += 1
                 cur_weights = self.candidate.get_weights()
-                next_candidate_weights = self.candidate.get_random_weight_neighbour()  
+                next_candidate_weights = self.get_random_weight_neighbour()  
                 
                 self.candidate.update_weights(next_candidate_weights)
                 fitness_score, best_move, best_score = self.candidate.fitness()
+                
+                if target_fitness and best_fitness_score >= target_fitness:
+                    print(f"Target fitness reached. Stopping evolution.")
+                    cur_temp = 0
+                    break
 
                 # Keep track of the best answer found so far:
                 if (fitness_score > best_fitness_score):
