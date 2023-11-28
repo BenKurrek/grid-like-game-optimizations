@@ -42,6 +42,24 @@ class ChessGame(BaseGame):
             [random.uniform(float(lower), float(upper)) for lower, upper in king_weight_bounds],
             [random.uniform(float(lower), float(upper)) for lower, upper in pawn_weight_bounds],
         ]
+        
+    def get_random_weight_neighbour(self):
+        def get_random_value(lower, upper):
+            return random.uniform(float(lower), float(upper))
+
+        def get_neighbour(value, lower, upper):
+            min_val = max(value - 0.01 * abs(upper - lower), lower)
+            max_val = min(value + 0.01 * abs(upper - lower), upper)
+            return get_random_value(min_val, max_val)
+
+        neighbour_weights_flattened = []
+        bounds = [queen_weight_bounds, rook_weight_bounds, knight_weight_bounds, bishop_weight_bounds, king_weight_bounds, pawn_weight_bounds]
+
+        for weights, bounds in zip(self.weight_for_eval_counts, bounds):
+            for value, (lower, upper) in zip(weights, bounds):
+                neighbour_weights_flattened.append(get_neighbour(value, lower, upper))
+                
+        return neighbour_weights_flattened
 
     def get_board_data(self):
         return [self.board, self.game_moves, self.move_sequences, self.ranked_moves, self.eval_count_cache]

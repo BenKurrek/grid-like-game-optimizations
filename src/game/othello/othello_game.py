@@ -89,6 +89,23 @@ class OthelloGame(BaseGame):
         return [
             (self.WEIGHTS_MIN, self.WEIGHTS_MAX) for _ in range(self.BOARD_SIZE**2)
         ]
+    
+    def get_random_weight_neighbour(self):
+        def get_random_value(lower, upper):
+            return np.random.uniform(lower, upper)
+
+        def get_neighbour(value, lower, upper):
+            min_val = max(value - 0.1 * abs(upper - lower), lower)
+            max_val = min(value + 0.1 * abs(upper - lower), upper)
+            return get_random_value(min_val, max_val)
+
+        neighbour_weights = np.copy(self.weights)
+        for i in range(self.BOARD_SIZE):
+            for j in range(self.BOARD_SIZE):
+                neighbour_weights[i, j] = get_neighbour(self.weights[i, j], self.WEIGHTS_MIN, self.WEIGHTS_MAX)
+
+        return neighbour_weights
+
 
     def get_weight_labels(self):
         letters = "ABCDEFGH"
