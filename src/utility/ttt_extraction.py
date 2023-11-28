@@ -99,8 +99,8 @@ def extract_random_ttt_positions(num_positions):
     # Extract random positions
     for _ in range(num_positions):
         # Choose a random game, currently represented as a line in a csv file
-        #board = [item.replace('\n', ' ').strip() if item.strip() != '' else ' ' for item in  random.choice(games).split(",")]
-        board = ['O', ' ', ' ', ' ', ' ', 'O', ' ', ' ', 'X']
+        board = [item.replace('\n', ' ').strip() if item.strip() != '' else ' ' for item in  random.choice(games).split(",")]
+        #board = ['O', ' ', ' ', ' ', ' ', 'O', ' ', ' ', 'X']
         moves_and_scores = minimax(board, player="X", max_player="X", original_board=board)
         board_data.append((board, moves_and_scores))
 

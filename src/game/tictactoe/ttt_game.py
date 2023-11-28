@@ -8,86 +8,28 @@ from src.utility.ttt_extraction import available_moves, make_move, undo_move, ch
 from itertools import permutations
 import json
 
-# Edges controlled
-# Number of 2 in a row
-# Middle control
-
-
-# weight_labels = [
-#     "2-adjacent-corner",
-#     "2-opposite-corner",
-#     "1-corner",
-#     "middle",
-#     "3-corner",
-#     "2-in-a-row-edge",
-#     "2-in-a-row-center",
-#     "A1",
-#     "A2",
-#     "A3",
-#     "B1",
-#     "B2",
-#     "B3",
-#     "C1",
-#     "C2",
-#     "C3",
-# ]
-# weight_bounds = [
-#     (-10, 10), # Holding 2 adjacent corners
-#     (-10, 10), # Holding 2 opposite corners
-#     (-10, 10), # Holding 1 corner
-#     (-10, 10), # Holding middle
-#     (-10, 10), # Holding 3 corners
-#     (-10, 10), # Holding two in a row edge
-#     (-10, 10), # Holding two in a row center
-
-#     (-10, 10), # A1
-#     (-10, 10), # A2
-#     (-10, 10), # A3
-#     (-10, 10), # B1
-#     (-10, 10), # B2
-#     (-10, 10), # B3
-#     (-10, 10), # C1
-#     (-10, 10), # C2
-#     (-10, 10), # C3
-# ]
-
 weight_labels = [
+    # board states
     "corners-controlled",
     "middle-controlled",
     "two-in-a-row",
+
+    # move types
     "winning-move",
     "blocking-win",
-    "forking-move",
-    "blocking-fork",
-    
-    "A1",
-    "A2",
-    "A3",
-    "B1",
-    "B2",
-    "B3",
-    "C1",
-    "C2",
-    "C3",
+    "forking-move", # creating a fork (3 adjacent corners)
+    "blocking-fork", # block opponent fork creation
+    "creating-fork-for-next-move", # two adjacent corners, create opportunity to create a fork next turn
 ]
 weight_bounds = [
-    (-10, 10), # Holding 2 adjacent corners
-    (-10, 10), # Holding 2 opposite corners
-    (-10, 10), # Holding 1 corner
-    (-10, 10), # Holding middle
-    (-10, 10), # Holding 3 corners
-    (-10, 10), # Holding two in a row edge
-    (-10, 10), # Holding two in a row center
-
-    (-10, 10), # A1
-    (-10, 10), # A2
-    (-10, 10), # A3
-    (-10, 10), # B1
-    (-10, 10), # B2
-    (-10, 10), # B3
-    (-10, 10), # C1
-    (-10, 10), # C2
-    (-10, 10), # C3
+    (-10, 10), # corners-controlled
+    (-10, 10), # middle-controlled
+    (-10, 10), # two-in-a-row
+    (-10, 10), # winning-move
+    (-10, 10), # blocking-win
+    (-10, 10), # forking-move
+    (-10, 10), # blocking-fork
+    (-10, 10), # creating-fork-for-next-move
 ]
 
 class tttGame(BaseGame):
@@ -148,10 +90,9 @@ class tttGame(BaseGame):
 
         avail_moves = available_moves(self.board)
         for move in avail_moves:
-            # evaluate a score for each weight
+            # evaluated_score measures how much board has improved, higher = better according to weights
             evaluated_score = self.evaluate_move(move)
-            # filter through self.moves_and_scores to get the index of the tuple whose index 0 is the move
-            # then get the score from that tuple
+            
             minimax_score = 0
             for v in self.moves_and_scores:
                 if v[0] == move:
@@ -161,143 +102,143 @@ class tttGame(BaseGame):
                 best_move = move
                 best_score = evaluated_score
 
-            score -= abs(minimax_score - evaluated_score)
+        # TODO: Confirm with Ben that this is the correct way to calculate score and fitness
+        # TODO: Merge chess fix
+        score -= abs(minimax_score - evaluated_score)
         return (score / len(avail_moves), best_move, best_score)
     
     def evaluate_move(self, move):
         new_board = self.board.copy()
-        
-        three_corners_score = self.three_corners(new_board)
-        two_adj_corners_score = self.two_adj_corners(new_board)
-        two_opp_corners_score = self.two_opp_corners(new_board)
-        one_corner_score = self.one_corner(new_board)
-        middle_score = self.middle(new_board)
-        two_in_a_row_edge_score = self.two_in_a_row_edge(new_board)
-        two_in_a_row_middle_score = self.two_in_a_row_middle(new_board)
-        a1_score = self.a1(new_board)
-        a2_score = self.a2(new_board)
-        a3_score = self.a3(new_board)
-        b1_score = self.b1(new_board)
-        b2_score = self.b2(new_board)
-        b3_score = self.b3(new_board)
-        c1_score = self.c1(new_board)
-        c2_score = self.c2(new_board)
-        c3_score = self.c3(new_board)
-        initial_score = (
-            self.weights[0] * two_adj_corners_score +
-            self.weights[1] * two_opp_corners_score +
-            self.weights[2] * one_corner_score +
-            self.weights[3] * middle_score +
-            self.weights[4] * three_corners_score +
-            self.weights[5] * two_in_a_row_edge_score +
-            self.weights[6] * two_in_a_row_middle_score +
-            self.weights[7] * a1_score +
-            self.weights[8] * a2_score +
-            self.weights[9] * a3_score +
-            self.weights[10] * b1_score +
-            self.weights[11] * b2_score +
-            self.weights[12] * b3_score +
-            self.weights[13] * c1_score +
-            self.weights[14] * c2_score +
-            self.weights[15] * c3_score
-        )
-
+        old_board = self.board.copy()
         make_move(new_board, move, "X")
+        
+        num_corner_score = self.num_corners_controlled(old_board, "X")
+        two_in_a_row_score = self.two_in_a_row(old_board)
+        middle_score = self.middle(old_board)
 
-        three_corners_score = self.three_corners(new_board)
-        two_adj_corners_score = self.two_adj_corners(new_board)
-        two_opp_corners_score = self.two_opp_corners(new_board)
-        one_corner_score = self.one_corner(new_board)
-        middle_score = self.middle(new_board)
-        two_in_a_row_edge_score = self.two_in_a_row_edge(new_board)
-        two_in_a_row_middle_score = self.two_in_a_row_middle(new_board)
-        a1_score = self.a1(new_board)
-        a2_score = self.a2(new_board)
-        a3_score = self.a3(new_board)
-        b1_score = self.b1(new_board)
-        b2_score = self.b2(new_board)
-        b3_score = self.b3(new_board)
-        c1_score = self.c1(new_board)
-        c2_score = self.c2(new_board)
-        c3_score = self.c3(new_board)
-        final_score = (
-            self.weights[0] * two_adj_corners_score +
-            self.weights[1] * two_opp_corners_score +
-            self.weights[2] * one_corner_score +
-            self.weights[3] * middle_score +
-            self.weights[4] * three_corners_score +
-            self.weights[5] * two_in_a_row_edge_score +
-            self.weights[6] * two_in_a_row_middle_score + 
-            self.weights[7] * a1_score +
-            self.weights[8] * a2_score +
-            self.weights[9] * a3_score +
-            self.weights[10] * b1_score +
-            self.weights[11] * b2_score +
-            self.weights[12] * b3_score +
-            self.weights[13] * c1_score +
-            self.weights[14] * c2_score +
-            self.weights[15] * c3_score
+        initial_score = (
+            self.weights[0] * num_corner_score +
+            self.weights[1] * two_in_a_row_score +
+            self.weights[2] * middle_score 
         )
 
+        num_corner_score = self.num_corners_controlled(new_board, "X")
+        two_in_a_row_score = self.two_in_a_row(new_board)
+        middle_score = self.middle(new_board)
+        winning_move = self.winning_move(new_board, move)
+        blocking_win = self.blocking_win(new_board, move)
+        forking_move = self.forking_move(new_board, move)
+        blocking_fork = self.blocking_fork(new_board, move)
+        creating_fork_for_next_move = self.creating_fork_for_next_move(new_board, move)
+
+
+        final_score = (
+            self.weights[0] * num_corner_score +
+            self.weights[1] * two_in_a_row_score +
+            self.weights[2] * middle_score + 
+            self.weights[3] * winning_move +
+            self.weights[4] * blocking_win +
+            self.weights[5] * forking_move +
+            self.weights[6] * blocking_fork +
+            self.weights[7] * creating_fork_for_next_move
+        )
+
+        
         return final_score - initial_score
     
-    def num_corners_controlled(self, board):
-        corners = [0, 2, 6, 8]
-        return len([corner for corner in corners if board[corner] == "X"])
-                
-    def three_corners(self, board):
-        # Any combination of 3 corners
-        conditions = [(0, 2, 6), (2, 6, 8), (0, 2, 8), (0, 6, 8)]
-        return any(board[a] == board[b] == board[c] == "X" for a, b, c in conditions)
-    
-    def two_opp_corners(self, board):
-        # Any combination of 2 opposite corners
-        conditions = [(0, 8), (2, 6)]
-        return any(board[a] == board[b] == "X" for a, b in conditions)
-    
-    def two_adj_corners(self, board):
-        # Any combination of 2 adjacent corners
-        conditions = [(0, 2), (6, 8), (0, 6), (2, 8)]
-        return any(board[a] == board[b] == "X" for a, b in conditions)
-    
-    def one_corner(self, board):
+    # ~~~~~~~~~~~~~~~ BOARD STATES ~~~~~~~~~~~~~~~
+    # These evaluations are done on the board both before and after the move
+    def num_corners_controlled(self, board, player):
         conditions = [0, 2, 6, 8]
-        return any(board[a] == "X" for a in conditions)
+        return len([corner for corner in conditions if board[corner] == player])
+    
+    def two_in_a_row(self, board):
+        conditions = [(0, 1), (1, 2), (0, 3), (2, 5), (3, 6), (5, 8), (6, 7), (7, 8), (1, 4), (3, 4), (4, 5), (4, 7)]
+        return len([two_in_a_row for two_in_a_row in conditions if board[two_in_a_row[0]] == "X" and board[two_in_a_row[1]] == "X"])
     
     def middle(self, board):
         return board[4] == "X"
     
-    def two_in_a_row_edge(self, board):
-        conditions = [(0, 1), (1, 2), (0, 3), (2, 5), (3, 6), (5, 8), (6, 7), (7, 8)]
-        return any(board[a] == board[b] == "X" for a, b in conditions)
+    # ~~~~~~~~~~~~~~~ MOVE CLASSIFICATION ~~~~~~~~~~~~~~~
+    # When necessary, these functions will be given old and new boards to compute
+    def winning_move(self, new_board, move):
+        if check_winner(new_board) == "X":
+            undo_move(new_board, move)
+            if check_winner(new_board) is None:
+                make_move(new_board, move, "X")
+                return True
+            make_move(new_board, move, "X")
+        
+        return False
     
-    def two_in_a_row_middle(self, board):
-        conditions = [(1, 4), (3, 4), (4, 5), (4, 7)]
-        return any(board[a] == board[b] == "X" for a, b in conditions)
+    def blocking_win(self, new_board, move):
+        # only evaluate if 0 is prevented from winning
+        if check_winner(new_board) is None or check_winner(new_board) == "X":
+            undo_move(new_board, move)
+            make_move(new_board, move, "O")
+            if check_winner(new_board) == "O":
+                undo_move(new_board, move)
+                make_move(new_board, move, "X")
+                return True
+            else:
+                undo_move(new_board, move)
+                make_move(new_board, move, "X")
+                return False
+            
+        return False
     
-    def a1(self, board):
-        return board[0] == "X"
+    def forking_move(self, new_board, move):
+        fork_conditions = [(0, 2, 6), (2, 6, 8), (0, 2, 8), (0, 6, 8)]
+        corners = [0, 2, 6, 8]
+        if move not in corners:
+            return False
+        # If fork exists, remove move and make sure fork did not exist prior to it
+        if any(new_board[a] == new_board[b] == new_board[c] == "X" for a, b, c in fork_conditions):
+            undo_move(new_board, move)
+            if not any(new_board[a] == new_board[b] == new_board[c] == "X" for a, b, c in fork_conditions):
+                make_move(new_board, move, "X")
+                return True
+            else:
+                make_move(new_board, move, "X")
+                return False
+            
+        return False
     
-    def a2(self, board):
-        return board[1] == "X"
+    def blocking_fork(self, new_board, move):
+        fork_conditions = [(0, 2, 6), (2, 6, 8), (0, 2, 8), (0, 6, 8)]
+        corners = [0, 2, 6, 8]
+        if move not in corners:
+            return False
+        # Place 0 where latest move occured, if fork exists, then move made blocked a fork
+        undo_move(new_board, move)
+        make_move(new_board, move, "0")
+        if any(new_board[a] == new_board[b] == new_board[c] == "O" for a, b, c in fork_conditions):
+            undo_move(new_board, move)
+            make_move(new_board, move, "X")
+            return True
+        else:
+            undo_move(new_board, move)
+            make_move(new_board, move, "X")
+            return False
+        
+
+    def creating_fork_for_next_move(self, new_board, move):
+        fork_conditions = [(0, 2, 6), (2, 6, 8), (0, 2, 8), (0, 6, 8)]
+        corners = [0, 2, 6, 8]
+        if move not in corners:
+            return False
+        
+        # If O controls 1 or less corners and X now controls 2 corners after the move, then move creates a fork for next move
+        return self.num_corners_controlled(new_board, "O") <= 1 and self.num_corners_controlled(new_board, "X") == 2
+            
+
+        
+
+
+
+        
+
     
-    def a3(self, board):
-        return board[2] == "X"
-    
-    def b1(self, board):
-        return board[3] == "X"
-    
-    def b2(self, board):
-        return board[4] == "X"
-    
-    def b3(self, board):
-        return board[5] == "X"
-    
-    def c1(self, board):
-        return board[6] == "X"
-    
-    def c2(self, board):
-        return board[7] == "X"
-    
-    def c3(self, board):
-        return board[8] == "X"
+
+
+
