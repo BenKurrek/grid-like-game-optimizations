@@ -4,8 +4,8 @@ import sys
 import configparser
 import io
 import os
+import json
 from PIL import Image
-from src.game.base_game import BaseGame
 from src.optimization.genetic_algorithm import GeneticAlgorithm
 from src.optimization.pso import PSO
 from src.utility.utility import create_and_evaluate_game
@@ -37,18 +37,19 @@ def main():
     print(f"Selected Algorithm: {algorithm_name}")
     
     weights_list = []
+    num_games_to_fit = 10
     
-    for game_num in range(10):
+    for game_num in range(num_games_to_fit):
         best_individual = None
         if algorithm_name == "genetic_algorithm":
             # Create a GeneticAlgorithm instance
-            genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.5)
+            genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.8)
 
             # Evolve the population for a certain number of generations
-            best_individual = genetic_algorithm.evolve(generations=10)
+            best_individual = genetic_algorithm.evolve(generations=500)
             # genetic_algorithm.plot_evolution_history()
         elif algorithm_name == "pso":
-            pso = PSO(game_name, num_particles=10)
+            pso = PSO(game_name, num_particles=30)
             # Evolve the population for a certain number of generations
             best_individual = pso.iterate(iterations=500)
             # pso.plot_evolution_history()
@@ -60,10 +61,17 @@ def main():
         combined_weights[weight_idx] = sum([weights_list[i][weight_idx] for i in range(len(weights_list))])/len(weights_list)
     
     evaluations = []
+    num_evaluations = 100
     # Perform evaluations
-    for evaluation in range(10): 
-        evaluations.append(create_and_evaluate_game(game_name, combined_weights))
-        
+    for evaluation in range(num_evaluations): 
+        fitness_score, best_move, index, num_moves = create_and_evaluate_game(game_name, combined_weights)
+        evaluations.append((fitness_score, str(best_move), index, num_moves))
+    
+    print(evaluations)
+    
+    file_path = "evaluations.json"
+    with open(file_path, 'w') as json_file:
+        json.dump(evaluations, json_file)
     # Use fitness function and rank_move
     
     # best_individual = None

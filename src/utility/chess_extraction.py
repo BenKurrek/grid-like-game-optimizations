@@ -59,7 +59,7 @@ def stockfish_evaluation(board):
     print(f"Best Moves: {best_moves_ascending}")
     return (move_sequences, ranked_moves)
 
-def extract_random_chess_positions(num_positions, seed):
+def extract_random_chess_positions(num_positions, seed=None):
     # Load the games from the PGN file
     games = []
     with open('./src/utility/master_games.pgn') as file:

@@ -2,6 +2,7 @@ from src.game.base_game import BaseGame
 
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 
 
 class OthelloGame(BaseGame):
@@ -57,6 +58,8 @@ class OthelloGame(BaseGame):
             )
             for move in self.valid_moves
         ]
+        if len(move_scores) == 0:
+            return (0, math.inf)
         valid_moves, move_scores = zip(
             *sorted(
                 zip(self.valid_moves, move_scores), reverse=True, key=lambda x: x[1]

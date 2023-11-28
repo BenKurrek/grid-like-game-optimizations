@@ -3,8 +3,9 @@ from src.optimization.genetic_algorithm import GeneticAlgorithm
 from src.utility.chess_extraction import extract_random_chess_positions
 from src.utility.othello_extraction import extract_random_othello_positions
 from src.utility.game_chooser import create_base_game
+import chess
 
-def create_and_evaluate_game(game_name, weights) -> tuple:
+def create_and_evaluate_game(game_name, weights) -> tuple[float, chess.Move, int, int]:
     # Create game
     board_data = None
     if game_name == "chess":
