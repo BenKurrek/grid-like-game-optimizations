@@ -37,13 +37,14 @@ def main():
     print(f"Selected Game: {game_name}")
     print(f"Selected Algorithm: {algorithm_name}")
     
-    EVALUATE = False
+    EVALUATE = True
     
     if EVALUATE:
         weights_list = []
-        num_games_to_fit = 10
+        # Number of boards to fit to.
+        num_boards_to_fit = 20
         
-        for game_num in range(num_games_to_fit):
+        for game_num in range(num_boards_to_fit):
             best_individual = None
             if algorithm_name == "genetic_algorithm":
                 # Create a GeneticAlgorithm instance
@@ -62,7 +63,7 @@ def main():
                 
             weights_list.append(best_individual.get_weights())
         
-        # Combine weights
+        # Combine weights by averaging them out.
         combined_weights = weights_list[0]
         for weight_idx in range(len(weights_list[0])):
             combined_weights[weight_idx] = sum([weights_list[i][weight_idx] for i in range(len(weights_list))])/len(weights_list)
@@ -81,7 +82,6 @@ def main():
             json.dump(evaluations, json_file)
             
     else:
-        
         best_individual = None
         if algorithm_name == "genetic_algorithm":
             # Create a GeneticAlgorithm instance
