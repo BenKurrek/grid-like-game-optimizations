@@ -7,6 +7,7 @@ import os
 import json
 from PIL import Image
 from src.optimization.genetic_algorithm import GeneticAlgorithm
+from src.optimization.simulated_annealing import SimulatedAnnealing
 from src.optimization.pso import PSO
 from src.utility.utility import create_and_evaluate_game
 
@@ -116,6 +117,6 @@ def main():
             image.show()
         elif game_name == "othello":
             best_individual.visualize_best_move(img_size=400)
-
+ 
 if __name__ == "__main__":
     main()

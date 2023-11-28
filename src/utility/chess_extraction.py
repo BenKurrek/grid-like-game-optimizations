@@ -19,7 +19,7 @@ def stockfish_evaluation(board):
         # Find the next two moves and evaluate the score
         principle_moveset = []
         score = None
-        time_to_find_moveset = 5
+        time_to_find_moveset = 1
         
         while len(principle_moveset) < two_ply_moves * 2:
             info = engine.analyse(board, chess.engine.Limit(time=time_to_find_moveset, depth=20), root_moves=[move])
@@ -57,8 +57,7 @@ def stockfish_evaluation(board):
     print(f"Best Moves: {best_moves_ascending}")
     return (move_sequences, ranked_moves)
 
-def extract_random_chess_positions(num_positions, seed=None):
-    # Load the games from the PGN file
+def load_games():
     games = []
     with open('./src/utility/master_games.pgn') as file:
         while True:
@@ -66,6 +65,12 @@ def extract_random_chess_positions(num_positions, seed=None):
             if game is None:
                 break
             games.append(game)
+    
+    return games
+
+def extract_random_chess_positions(num_positions, seed=None):
+    # Load the games from the PGN file
+    games = load_games()
 
     board_data = []
     # Extract random positions
@@ -87,7 +92,7 @@ def extract_random_chess_positions(num_positions, seed=None):
         board_moves = list(random_game.mainline_moves())
 
         total_moves = 1
-        num_moves_to_traverse = random.randint(40, len(board_moves) - 20)
+        num_moves_to_traverse = random.randint(40, len(board_moves) - 40)
         for _ in range(num_moves_to_traverse):
             move = board_moves.pop(0)
             board.push(move)
