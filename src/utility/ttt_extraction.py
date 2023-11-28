@@ -89,11 +89,18 @@ def check_winner(board):
     else:
         return None
 
-def extract_random_ttt_positions(num_positions):
+def extract_random_ttt_positions(num_positions, train=True):
     # Load the games from the PGN file
     games = []
     with open("src/utility/ttt_all_incomplete_board_states.csv", "r") as file:
-        games = file.readlines()
+        all_games = file.readlines()
+
+    if train:
+        # first half of games in csv
+        games = all_games[:int(len(all_games) * 0.5)]
+    else:
+        # second half of games in csv
+        games = all_games[int(len(all_games) * 0.5):]
 
     board_data = []
     # Extract random positions
