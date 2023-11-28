@@ -257,3 +257,16 @@ class OthelloGame(BaseGame):
             return np.sum(board * weight_midgame * player)
         else:
             return np.sum(board * weight_endgame * player)
+        
+    def __str__(self):
+        board_str = ""
+        for row in range(self.BOARD_SIZE):
+            for col in range(self.BOARD_SIZE):
+                if self.board[row, col] == self.EMPTY:
+                    board_str += "."
+                elif self.board[row, col] == self.BLACK:
+                    board_str += "B"
+                elif self.board[row, col] == self.WHITE:
+                    board_str += "W"
+            board_str += "\n"
+        return board_str

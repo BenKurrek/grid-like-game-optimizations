@@ -43,7 +43,7 @@ def main():
         best_individual = None
         if algorithm_name == "genetic_algorithm":
             # Create a GeneticAlgorithm instance
-            genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.8)
+            genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.8, seed=seed)
 
             # Evolve the population for a certain number of generations
             best_individual = genetic_algorithm.evolve(generations=500)
