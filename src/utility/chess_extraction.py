@@ -1,5 +1,6 @@
 import time
 import random
+import chess
 
 from tqdm import tqdm
 from chess import engine, pgn

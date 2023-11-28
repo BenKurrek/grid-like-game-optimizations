@@ -8,6 +8,8 @@ from src.utility.ttt_extraction import available_moves, make_move, undo_move, ch
 from itertools import permutations
 import json
 
+# *************** Game State Based Evaluation ***************
+# Note: pure square based evaluation is available below.
 weight_labels = [
     # board states
     "corners-controlled",
@@ -234,7 +236,92 @@ class tttGame(BaseGame):
         return self.num_corners_controlled(new_board, "O") <= 1 and self.num_corners_controlled(new_board, "X") == 2
             
 
+    # ****************** SQUARE BASED EVALUATION ******************
+    # weight_labels = [
+    #     "A1",
+    #     "A2",
+    #     "A3",
+    #     "B1",
+    #     "B2",
+    #     "B3",
+    #     "C1",
+    #     "C2",
+    #     "C3",
+    # ]
+    # weight_bounds = [
+    #     (-10, 10), # A1
+    #     (-10, 10), # A2
+    #     (-10, 10), # A3
+    #     (-10, 10), # B1
+    #     (-10, 10), # B2
+    #     (-10, 10), # B3
+    #     (-10, 10), # C1
+    #     (-10, 10), # C2
+    #     (-10, 10), # C3
+    # ]
+
+    # def evaluate_move(self, move):
+    #     new_board = self.board.copy()
+    #     old_board = self.board.copy()
+
+
         
+    #     initial_score = (
+    #         self.weights[0] * self.a1(old_board) +
+    #         self.weights[1] * self.a2(old_board) +
+    #         self.weights[2] * self.a3(old_board) +
+    #         self.weights[3] * self.b1(old_board) +
+    #         self.weights[4] * self.b2(old_board) +
+    #         self.weights[5] * self.b3(old_board) +
+    #         self.weights[6] * self.c1(old_board) +
+    #         self.weights[7] * self.c2(old_board) +
+    #         self.weights[8] * self.c3(old_board)
+    #     )
+
+    #     make_move(new_board, move, "X")
+
+    #     final_score = (
+    #         self.weights[0] * self.a1(new_board) +
+    #         self.weights[1] * self.a2(new_board) +
+    #         self.weights[2] * self.a3(new_board) +
+    #         self.weights[3] * self.b1(new_board) +
+    #         self.weights[4] * self.b2(new_board) +
+    #         self.weights[5] * self.b3(new_board) +
+    #         self.weights[6] * self.c1(new_board) +
+    #         self.weights[7] * self.c2(new_board) +
+    #         self.weights[8] * self.c3(new_board)
+    #     )
+
+    #     return final_score - initial_score
+
+        
+    # def a1(self, board):
+    #     return board[0] == "X"
+    
+    # def a2(self, board):
+    #     return board[1] == "X"
+    
+    # def a3(self, board):
+    #     return board[2] == "X"
+    
+    # def b1(self, board):
+    #     return board[3] == "X"
+    
+    # def b2(self, board):
+    #     return board[4] == "X"
+    
+    # def b3(self, board):
+    #     return board[5] == "X"
+    
+    # def c1(self, board):
+    #     return board[6] == "X"
+    
+    # def c2(self, board):
+    #     return board[7] == "X"
+    
+    # def c3(self, board):
+    #     return board[8] == "X"
+    
 
 
 
