@@ -1,6 +1,6 @@
 # src/game/chess.py
 import chess
-import chess.svg
+from chess import svg
 import random
 from src.game.base_game import BaseGame
 
@@ -207,12 +207,12 @@ class ChessGame(BaseGame):
 
     def visualize_best_move(self, img_size):
         best_move = self.get_best_move()
-        return chess.svg.board(
+        return svg.board(
             board=self.board, 
             arrows=[
-                chess.svg.Arrow(best_move.from_square, best_move.to_square, color="#FF0000cc"),  # Red for our move
-                chess.svg.Arrow(self.game_moves[0].from_square, self.game_moves[0].to_square, color="#00cc00cc"),  # Green for actual move
-                chess.svg.Arrow(self.stockfish_move.from_square, self.stockfish_move.to_square, color="#0000ccFF")  # Blue for Stockfish move
+                svg.Arrow(best_move.from_square, best_move.to_square, color="#FF0000cc"),  # Red for our move
+                svg.Arrow(self.game_moves[0].from_square, self.game_moves[0].to_square, color="#00cc00cc"),  # Green for actual move
+                svg.Arrow(self.stockfish_move.from_square, self.stockfish_move.to_square, color="#0000ccFF")  # Blue for Stockfish move
                 ],
             size=img_size
             )

@@ -6,6 +6,8 @@ import io
 import os
 import json
 from PIL import Image
+from colorama import Fore, Style
+from src.game.base_game import BaseGame
 from src.optimization.genetic_algorithm import GeneticAlgorithm
 from src.optimization.simulated_annealing import SimulatedAnnealing
 from src.optimization.pso import PSO
@@ -14,6 +16,7 @@ from src.utility.utility import create_and_evaluate_game
 def read_config(file_path="config.ini"):
     config = configparser.ConfigParser()
     config.read(file_path)
+    
     return config
 
 def main():
@@ -28,6 +31,8 @@ def main():
 
     # Read configuration from the file
     config = read_config()
+    print(f"{Fore.MAGENTA}~~~~~~~~~~~~~~~~~~~~   STARTING ALGORITHM   ~~~~~~~~~~~~~~~~~~~~{Style.RESET_ALL}")
+
 
     # Access game and algorithm choices
     game_name = config.get("Game", "name")
