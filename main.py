@@ -85,6 +85,8 @@ def main():
         file_path = "evaluations.json"
         with open(file_path, 'w') as json_file:
             json.dump(evaluations, json_file)
+        with open("weights.json", 'w') as json_file:
+            json.dump(combined_weights, json_file)
             
     else:
         best_individual = None

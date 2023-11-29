@@ -5,3 +5,4 @@ cairo.tar.xz
 **/__pycache__/
 evaluations.json
 .DS_Store
+weights.json
