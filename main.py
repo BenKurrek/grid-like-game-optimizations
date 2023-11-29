@@ -42,7 +42,7 @@ def main():
     if EVALUATE:
         weights_list = []
         # Number of boards to fit to.
-        num_boards_to_fit = 20
+        num_boards_to_fit = 2
         
         for game_num in range(num_boards_to_fit):
             best_individual = None
@@ -53,9 +53,9 @@ def main():
                 # Evolve the population for a certain number of generations
                 best_individual = genetic_algorithm.evolve(generations=500)
             elif algorithm_name == "pso":
-                pso = PSO(game_name, num_particles=30)
+                pso = PSO(game_name, num_particles=10)
                 # Evolve the population for a certain number of generations
-                best_individual = pso.iterate(iterations=500)
+                best_individual = pso.iterate(iterations=4)
             elif algorithm_name == "simulated_annealing":
                 
                 simulated_annealing = SimulatedAnnealing(game_name, temperature=1, seed=seed)
@@ -69,10 +69,10 @@ def main():
             combined_weights[weight_idx] = sum([weights_list[i][weight_idx] for i in range(len(weights_list))])/len(weights_list)
         
         evaluations = []
-        num_evaluations = 100 #Number of times the weights are evaluated on different board states.
+        num_evaluations = 2 #Number of times the weights are evaluated on different board states.
         # Perform evaluations
         for evaluation in range(num_evaluations): 
-            fitness_score, best_move, index, num_moves = create_and_evaluate_game(game_name, combined_weights)
+            fitness_score, best_move, index, num_moves = create_and_evaluate_game(game_name, combined_weights, evaluation)
             evaluations.append((fitness_score, str(best_move), index, num_moves))
         
         print(evaluations)

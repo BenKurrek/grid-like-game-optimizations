@@ -5,16 +5,16 @@ from src.utility.othello_extraction import extract_random_othello_positions
 from src.utility.game_chooser import create_base_game
 import chess
 
-def create_and_evaluate_game(game_name, weights) -> tuple[float, chess.Move, int, int]:
+def create_and_evaluate_game(game_name, weights, board_num) -> tuple[float, chess.Move, int, int]:
     # Create game
     board_data = None
     if game_name == "chess":
         # Individuals in the population each start with the same random position.
         # Their chromosomes are made up of genes representing fitness function weights
-        board_data = extract_random_chess_positions(num_positions=1)[0]
+        board_data = extract_random_chess_positions(num_positions=1, seed=board_num)[0]
         # Create the population given the set of initial individuals
     elif game_name == "othello":
-        board_data = extract_random_othello_positions(num_positions=1, dataset="test")[0]
+        board_data = extract_random_othello_positions(seed=board_num, num_positions=1, randomize=False, dataset="test")[0]
         
     game = create_base_game(game_name, board_data)
     
