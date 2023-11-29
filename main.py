@@ -6,6 +6,7 @@ import io
 import os
 import json
 from PIL import Image
+from copy import deepcopy
 from colorama import Fore, Style
 from src.game.base_game import BaseGame
 from src.optimization.genetic_algorithm import GeneticAlgorithm
@@ -69,7 +70,7 @@ def main():
             weights_list.append(best_individual.get_weights())
         
         # Combine weights by averaging them out.
-        combined_weights = weights_list[0]
+        combined_weights = deepcopy(weights_list[0])
         for weight_idx in range(len(weights_list[0])):
             combined_weights[weight_idx] = sum([weights_list[i][weight_idx] for i in range(len(weights_list))])/len(weights_list)
         
