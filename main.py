@@ -46,7 +46,7 @@ def main():
         genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.8, seed=seed)
 
         # Evolve the population for a certain number of generations
-        best_individual = genetic_algorithm.evolve(generations=500)
+        best_individual = genetic_algorithm.evolve(generations=2000)
         genetic_algorithm.plot_evolution_history()
     elif algorithm_name == "pso":
         pso = PSO(game_name, num_particles=10)
