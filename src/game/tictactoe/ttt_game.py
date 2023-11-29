@@ -52,7 +52,7 @@ class tttGame(BaseGame):
         return [self.board, self.moves_and_scores]
 
     def rank_move(self, move):
-        rank = 1
+        rank = 0
         for v in self.moves_and_scores:
             if v[0] == move:
                 return (rank, len(list(self.moves_and_scores)))

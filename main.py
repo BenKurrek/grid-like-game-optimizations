@@ -43,27 +43,13 @@ def main():
     best_individual = None
     if algorithm_name == "genetic_algorithm":
         # Create a GeneticAlgorithm instance
-
-        # Evolve the population for a certain number of generations
-        if game_name == "tictactoe":
-            genetic_algorithm = GeneticAlgorithm(game_name, population_size=4, mutation_rate=0.5)
-            generations = 20
-        else:
-            genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.5)
-            generations = 500
-
-        best_individual = genetic_algorithm.evolve(generations=generations)
-        #genetic_algorithm.plot_evolution_history()
         genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.8, seed=seed)
 
         # Evolve the population for a certain number of generations
-        best_individual = genetic_algorithm.evolve(generations=generations)
+        best_individual = genetic_algorithm.evolve(generations=500)
         genetic_algorithm.plot_evolution_history()
     elif algorithm_name == "pso":
-        if game_name == "tictactoe":
-            pso = PSO(game_name, num_particles=2)
-        else:
-            pso = PSO(game_name, num_particles=10)
+        pso = PSO(game_name, num_particles=10)
         # Evolve the population for a certain number of generations
         best_individual = pso.iterate(iterations=10)
         pso.plot_evolution_history()

@@ -9,7 +9,7 @@ from chess import engine, pgn
 def stockfish_evaluation(board):
     two_ply_moves = 4
 
-    myEngine = engine.SimpleEngine.popen_uci("./stockfish")
+    engine = chess.engine.SimpleEngine.popen_uci("./stockfish")
     move_sequences = {}
     total_moves = len(list(board.legal_moves))
     best_moves_ascending = []
@@ -37,7 +37,7 @@ def stockfish_evaluation(board):
         best_moves_ascending.append((move, score))
 
     print(f"Move Sequences: {move_sequences}")
-    myEngine.quit()
+    engine.quit()
 
     # Sort the moves by score
     best_moves_ascending.sort(key=lambda x: x[1].relative.score(mate_score=2000), reverse=chess.WHITE)
@@ -61,7 +61,7 @@ def load_games():
     games = []
     with open('./src/utility/master_games.pgn') as file:
         while True:
-            game = pgn.read_game(file)
+            game = chess.pgn.read_game(file)
             if game is None:
                 break
             games.append(game)
