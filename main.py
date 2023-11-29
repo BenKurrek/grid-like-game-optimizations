@@ -5,6 +5,7 @@ import configparser
 import io
 import os
 from PIL import Image
+from colorama import Fore, Style
 from src.game.base_game import BaseGame
 from src.optimization.genetic_algorithm import GeneticAlgorithm
 from src.optimization.simulated_annealing import SimulatedAnnealing
@@ -13,6 +14,7 @@ from src.optimization.pso import PSO
 def read_config(file_path="config.ini"):
     config = configparser.ConfigParser()
     config.read(file_path)
+    
     return config
 
 def main():
@@ -27,6 +29,8 @@ def main():
 
     # Read configuration from the file
     config = read_config()
+    print(f"{Fore.MAGENTA}~~~~~~~~~~~~~~~~~~~~   STARTING ALGORITHM   ~~~~~~~~~~~~~~~~~~~~{Style.RESET_ALL}")
+
 
     # Access game and algorithm choices
     game_name = config.get("Game", "name")

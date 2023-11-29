@@ -1,1 +1,6 @@
+cairo-1.14.6
+cairo.tar.xz
+457a-env
+457a-venv
 **/__pycache__/
+.DS_Store

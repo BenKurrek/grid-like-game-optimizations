@@ -1,9 +1,9 @@
-import chess
-import chess.pgn
-import chess.engine
-import random
-from tqdm import tqdm
 import time
+import random
+import chess
+
+from tqdm import tqdm
+from chess import engine, pgn
 
 # Evaluate the score of every legal move (and get the next best move)
 def stockfish_evaluation(board):

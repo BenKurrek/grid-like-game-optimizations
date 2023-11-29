@@ -5,6 +5,10 @@ from src.utility.game_chooser import create_base_game
 from src.game.base_game import BaseGame
 import matplotlib.pyplot as plt
 
+from colorama import Fore, Back, Style
+
+from src.utility.ttt_extraction import extract_random_ttt_positions
+
 class GeneticAlgorithm:
     def __init__(self, game_name, population_size=10, mutation_rate=0, seed=None):
         self.history = []  
@@ -80,6 +84,9 @@ class GeneticAlgorithm:
             board_data = extract_random_chess_positions(num_positions=1, seed=self.seed)[0]
             # Create the population given the set of initial individuals
             return [create_base_game(self.game_name, board_data) for _ in range(self.population_size)]
+        elif self.game_name == "tictactoe":
+            board_data = extract_random_ttt_positions(num_positions=1)[0]
+            return[create_base_game(self.game_name, board_data) for _ in range(self.population_size)]
         elif self.game_name == "othello":
             board_data = extract_random_othello_positions(num_positions=1)[0]
             return [create_base_game(self.game_name, board_data) for _ in range(self.population_size)]
@@ -122,8 +129,8 @@ class GeneticAlgorithm:
             for individual in self.population:
                 fitness_score, best_move, best_score = individual.fitness()
                 fitness_scores.append((individual, (fitness_score, best_move, best_score)))
-               # print(f"Chosen Move: {best_move}. Evaluated Score: {best_score}. Fitnesss: {fitness_score}")
-            
+
+
             # Sort to get the top fitness scores for the next generation
             fitness_scores.sort(key=lambda x: x[1][0], reverse=True)
             best_individual, best_fitness_data = fitness_scores[0]
@@ -153,6 +160,7 @@ class GeneticAlgorithm:
             self.population = new_population
 
             best_move_rank = best_individual.rank_move(best_move)
+
             self.history.append({
                 "best_fitness": best_fitness_score,
                 "best_move": best_move,
@@ -160,9 +168,6 @@ class GeneticAlgorithm:
                 "best_move_rank": best_move_rank
             })
             self.weight_history.append(best_individual.get_weights())
-
-            print(f"\nGeneration {generation + 1}, Best Fitness: {best_fitness_score}, Best Move: {best_move} with rank: {best_move_rank}")
-            print(f"Weights: {best_individual.get_weights()}\n")
 
         self.weight_labels = best_individual.get_weight_labels()
         self.weight_bounds = best_individual.get_weight_bounds()
