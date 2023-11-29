@@ -8,13 +8,14 @@ train_data = []
 test_data = []
 
 
-def initialize_train_test_data(train_ratio=0.6, randomize=True) -> None:
+def initialize_train_test_data(train_ratio=0.6, seed=0, randomize=True) -> None:
     """
     Initializes the train and test data for Othello.
 
     :param train_ratio: Ratio of training positions to test positions.
     :param randomize: If True, the positions are shuffled.
     """
+    random.seed(seed)
     with open(data_file) as csvfile:
         reader = csv.reader(csvfile, delimiter=",")
         raw_data = []  # Each row in the CSV file
@@ -42,7 +43,7 @@ def initialize_train_test_data(train_ratio=0.6, randomize=True) -> None:
 
 
 def extract_random_othello_positions(
-    num_positions=1, dataset="train", randomize=True, train_ratio=0.6
+    seed=0, num_positions=1, dataset="train", randomize=True, train_ratio=0.6
 ) -> list[str]:
     """
     Extracts random Othello positions from the dataset.
@@ -55,8 +56,9 @@ def extract_random_othello_positions(
     :param train_ratio: Ratio of training positions to test positions.
     """
     if not train_data:
-        initialize_train_test_data(train_ratio=train_ratio, randomize=randomize)
+        initialize_train_test_data(train_ratio=train_ratio, randomize=randomize, seed=seed)
     if dataset == "train":
         return random.choices(train_data, k=num_positions)
     else:
+        random.seed(seed)
         return random.choices(test_data, k=num_positions)

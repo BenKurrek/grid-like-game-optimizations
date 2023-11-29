@@ -3,4 +3,6 @@ cairo.tar.xz
 457a-env
 457a-venv
 **/__pycache__/
+evaluations.json
 .DS_Store
+weights.json
