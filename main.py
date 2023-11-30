@@ -95,7 +95,7 @@ def main():
     elif LAYER_OPTMIZATION:
         history = None
         seed = 1
-        for particles in [0.01, 0.05, 0.1]:
+        for particles in [0.001, 0.005, 0.01, 0.05, 0.1]:
             if algorithm_name == "genetic_algorithm":
                 # Create a GeneticAlgorithm instance
                 genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.8, seed=seed)
@@ -113,7 +113,7 @@ def main():
             elif algorithm_name == "simulated_annealing":
                 simulated_annealing = SimulatedAnnealing(game_name, temperature=particles, seed=seed)
 
-                best_individual = simulated_annealing.iterate(iterations_per_temp=5)
+                best_individual = simulated_annealing.iterate(iterations_per_temp=4)
                 history = simulated_annealing.history
                 # simulated_annealing.plot_evolution_history()
         
