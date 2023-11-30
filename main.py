@@ -95,7 +95,7 @@ def main():
     elif LAYER_OPTMIZATION:
         history = None
         seed = 1
-        for particles in [5,15,40]:
+        for particles in [0.01, 0.05, 0.1]:
             if algorithm_name == "genetic_algorithm":
                 # Create a GeneticAlgorithm instance
                 genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.8, seed=seed)
@@ -111,7 +111,7 @@ def main():
                 history = pso.history
                 # pso.plot_evolution_history()
             elif algorithm_name == "simulated_annealing":
-                simulated_annealing = SimulatedAnnealing(game_name, temperature=1, seed=seed)
+                simulated_annealing = SimulatedAnnealing(game_name, temperature=particles, seed=seed)
 
                 best_individual = simulated_annealing.iterate(iterations_per_temp=5)
                 history = simulated_annealing.history
@@ -121,10 +121,10 @@ def main():
             best_fitness_values = [entry["best_fitness"] for entry in history]
             
             # Plotting best fitness values
-            plt.plot(generations, best_fitness_values, linewidth=1.5, label=f"Particles: {particles}")
-        plt.title('Best Fitness')
-        plt.xlabel('Generation')
-        plt.ylabel('Fitness')
+            plt.plot(generations, best_fitness_values, linewidth=1.5, label=f"Temperature: {particles}")
+        plt.title(f'Best Fitness {game_name}')
+        plt.xlabel(f'Iterations {game_name}')
+        plt.ylabel(f'Fitness {game_name}')
         # Add a legend
         plt.legend()
 
