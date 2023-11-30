@@ -1,6 +1,7 @@
 # main.py
 
 import sys
+import matplotlib.pyplot as plt
 import configparser
 import io
 import os
@@ -43,7 +44,8 @@ def main():
     print(f"Selected Game: {game_name}")
     print(f"Selected Algorithm: {algorithm_name}")
     
-    EVALUATE = True
+    EVALUATE = False
+    LAYER_OPTMIZATION = True
     
     if EVALUATE:
         weights_list = []
@@ -88,7 +90,46 @@ def main():
             json.dump(evaluations, json_file)
         with open("weights.json", 'w') as json_file:
             json.dump(combined_weights, json_file)
+    
+    elif LAYER_OPTMIZATION:
+        history = None
+        seed = 1
+        for particles in [5,15,40]:
+            if algorithm_name == "genetic_algorithm":
+                # Create a GeneticAlgorithm instance
+                genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.8, seed=seed)
+
+                # Evolve the population for a certain number of generations
+                best_individual = genetic_algorithm.evolve(generations=2000)
+                history = genetic_algorithm.history
+                # genetic_algorithm.plot_evolution_history()
+            elif algorithm_name == "pso":
+                pso = PSO(game_name, num_particles=particles, seed=seed)
+                # Evolve the population for a certain number of generations
+                best_individual = pso.iterate(iterations=200)
+                history = pso.history
+                # pso.plot_evolution_history()
+            elif algorithm_name == "simulated_annealing":
+                simulated_annealing = SimulatedAnnealing(game_name, temperature=1, seed=seed)
+
+                best_individual = simulated_annealing.iterate(iterations_per_temp=5)
+                history = simulated_annealing.history
+                # simulated_annealing.plot_evolution_history()
+        
+            generations = range(1, len(history) + 1)
+            best_fitness_values = [entry["best_fitness"] for entry in history]
             
+            # Plotting best fitness values
+            plt.plot(generations, best_fitness_values, linewidth=1.5, label=f"Particles: {particles}")
+        plt.title('Best Fitness')
+        plt.xlabel('Generation')
+        plt.ylabel('Fitness')
+        # Add a legend
+        plt.legend()
+
+        # Show the plot
+        plt.show()
+        
     else:
         best_individual = None
         if algorithm_name == "genetic_algorithm":

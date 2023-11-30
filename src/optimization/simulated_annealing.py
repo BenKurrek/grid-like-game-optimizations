@@ -4,6 +4,7 @@ import math
 import numpy as np
 from src.utility.chess_extraction import extract_random_chess_positions
 from src.utility.othello_extraction import extract_random_othello_positions
+from src.utility.ttt_extraction import extract_random_ttt_positions
 from src.utility.game_chooser import create_base_game
 import matplotlib.pyplot as plt
 from math import e
@@ -26,8 +27,13 @@ class SimulatedAnnealing:
             # Create the candidate given the set of initial individuals
             return create_base_game(self.game_name, board_data)
         elif self.game_name == "othello":
-            board_data = extract_random_othello_positions(num_positions=1)[0]
+            board_data = extract_random_othello_positions(num_positions=1, seed=self.seed)[0]
             return create_base_game(self.game_name, board_data)
+        elif self.game_name == "tictactoe":
+            board_data = extract_random_ttt_positions(num_positions=1, board_number=self.seed)[0]
+            return create_base_game(self.game_name, board_data)
+        if self.seed:
+            self.seed += 1
         # elif self.game_name == "go":
         #     self.game = Go()  # Replace with actual Go initialization
         else:

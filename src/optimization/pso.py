@@ -13,10 +13,11 @@ from copy import deepcopy
 from src.utility.ttt_extraction import extract_random_ttt_positions
 
 class PSO():
-    def __init__(self, game_name, num_particles=10):
+    def __init__(self, game_name, num_particles=10, seed=None):
         self.history = []  
         self.weight_history = []  
         self.weight_labels = []
+        self.seed = seed
         
         # Initalize PSO weights/
         # TODO Verify these values.
@@ -50,15 +51,17 @@ class PSO():
         if self.game_name == "chess":
             # Individuals in the population each start with the same random position.
             # Their chromosomes are made up of genes representing fitness function weights
-            board_data = extract_random_chess_positions(num_positions=1)[0]
+            board_data = extract_random_chess_positions(num_positions=1, seed=self.seed)[0]
             # Create the population given the set of initial individuals
             return [create_base_game(self.game_name, board_data) for _ in range(self.num_particles)]
         elif self.game_name == "othello":
-            board_data = extract_random_othello_positions(num_positions=1)[0]
+            board_data = extract_random_othello_positions(seed=self.seed, num_positions=1)[0]
             return [create_base_game(self.game_name, board_data) for _ in range(self.num_particles)]
         elif self.game_name == "tictactoe":
-            board_data = extract_random_ttt_positions(num_positions=1)[0]
+            board_data = extract_random_ttt_positions(num_positions=1, board_number=self.seed)[0]
             return [create_base_game(self.game_name, board_data) for _ in range(self.num_particles)]
+        if self.seed:
+            self.seed += 1
         # elif self.game_name == "go":
         #     self.game = Go()  # Replace with actual Go initialization
         else:
