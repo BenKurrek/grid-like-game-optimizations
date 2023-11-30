@@ -85,11 +85,13 @@ class GeneticAlgorithm:
             # Create the population given the set of initial individuals
             return [create_base_game(self.game_name, board_data) for _ in range(self.population_size)]
         elif self.game_name == "tictactoe":
-            board_data = extract_random_ttt_positions(num_positions=1)[0]
+            board_data = extract_random_ttt_positions(num_positions=1, board_number=self.seed)[0]
             return[create_base_game(self.game_name, board_data) for _ in range(self.population_size)]
         elif self.game_name == "othello":
-            board_data = extract_random_othello_positions(num_positions=1)[0]
+            board_data = extract_random_othello_positions(seed=self.seed, num_positions=1)[0]
             return [create_base_game(self.game_name, board_data) for _ in range(self.population_size)]
+        if self.seed:
+            self.seed += 1
         # elif self.game_name == "go":
         #     self.game = Go()  # Replace with actual Go initialization
         else:

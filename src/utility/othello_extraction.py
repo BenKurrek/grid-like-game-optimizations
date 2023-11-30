@@ -43,7 +43,7 @@ def initialize_train_test_data(train_ratio=0.6, seed=0, randomize=True) -> None:
 
 
 def extract_random_othello_positions(
-    seed=0, num_positions=1, dataset="train", randomize=True, train_ratio=0.6
+    seed=None, num_positions=1, dataset="train", randomize=True, train_ratio=0.6
 ) -> list[str]:
     """
     Extracts random Othello positions from the dataset.
@@ -58,7 +58,10 @@ def extract_random_othello_positions(
     if not train_data:
         initialize_train_test_data(train_ratio=train_ratio, randomize=randomize, seed=seed)
     if dataset == "train":
+        if seed:
+            random.seed(seed)
         return random.choices(train_data, k=num_positions)
     else:
-        random.seed(seed)
+        if seed:
+            random.seed(seed)
         return random.choices(test_data, k=num_positions)
