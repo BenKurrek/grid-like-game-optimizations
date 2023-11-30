@@ -7,7 +7,7 @@ from chess import engine, pgn
 
 # Evaluate the score of every legal move (and get the next best move)
 def stockfish_evaluation(board):
-    two_ply_moves = 4
+    two_ply_moves = 8
 
     engine = chess.engine.SimpleEngine.popen_uci("./stockfish")
     move_sequences = {}
@@ -27,6 +27,10 @@ def stockfish_evaluation(board):
             score = info['score']
             time_to_find_moveset += 0.1
 
+            if time_to_find_moveset > 5:
+                print(f"Time to find moveset exceeded 5 seconds. Breaking.")
+                return (None, None)
+
         move_sequences[move.uci()] = {
             'score': info['score'],
             # Get the first depth number of moves in the principle variation
@@ -36,7 +40,7 @@ def stockfish_evaluation(board):
         # Add the move to the ranked moves list
         best_moves_ascending.append((move, score))
 
-    print(f"Move Sequences: {move_sequences}")
+    #print(f"Move Sequences: {move_sequences}")
     engine.quit()
 
     # Sort the moves by score
@@ -53,8 +57,8 @@ def stockfish_evaluation(board):
         ranked_moves[move.uci()] = rank
         rank += 1
 
-    print(f"Ranked Moves: {ranked_moves}")
-    print(f"Best Moves: {best_moves_ascending}")
+    #print(f"Ranked Moves: {ranked_moves}")
+    #print(f"Best Moves: {best_moves_ascending}")
     return (move_sequences, ranked_moves)
 
 def load_games():
@@ -83,9 +87,9 @@ def extract_random_chess_positions(num_positions, seed=None):
         random.seed(seed)
 
         random_game = random.choice(games)
-        print(f"Game: {random_game.headers['Event']}")
+        #print(f"Game: {random_game.headers['Event']}")
 
-        print(f"PGN Used: {random_game}")
+        #print(f"PGN Used: {random_game}")
 
         # Traverse the game to a random position
         board = random_game.board()
@@ -98,8 +102,11 @@ def extract_random_chess_positions(num_positions, seed=None):
             board.push(move)
             total_moves += 1
 
-        print(f"Final Ply: {(total_moves//2)}\n")
-        move_sequences, ranked_moves = stockfish_evaluation(board)
+        #print(f"Final Ply: {(total_moves//2)}\n")
+        (move_sequences, ranked_moves) = stockfish_evaluation(board)
+
+        if move_sequences is None or ranked_moves is None:
+            return extract_random_chess_positions(num_positions, seed=seed+1)
 
         # Output information about the current position
         # print(f"Game: {random_game.headers['Event']}")

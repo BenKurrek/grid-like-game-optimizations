@@ -162,7 +162,7 @@ class SimulatedAnnealing:
                 
                 self.weight_history.append(self.candidate.get_weights())
                 
-                print(f"\nIteration {counter + 1}, Best Fitness: {best_fitness_score}, Best Move: {best_best_move} with rank: {best_best_move_rank}")
+                print(f"\n\nIteration {counter + 1}, Best Fitness: {best_fitness_score}, Best Move: {best_best_move} with rank: {best_best_move_rank}")
                 print(f"Weights: {best_weights}\n")
 
             

@@ -11,9 +11,9 @@ bishop_weight_labels = [
 ]
 bishop_weight_bounds = [
     (220, 420), # how much the bishop is worth
-    (0, 50), # how much pawns that attack the enemy king are worth
-    (0, 50), # how much pawns that defend your king are worth
-    (0, 100), # how much the mobility of the bishop is worth
+    (0, 50), # how much bishops that attack the enemy king are worth
+    (0, 50), # how much bishops that defend your king are worth
+    (0, 200), # how much the mobility of the bishop is worth
     (0, 50), # how much bishop pairs are worth
 ]
 
