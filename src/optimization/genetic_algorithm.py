@@ -171,6 +171,9 @@ class GeneticAlgorithm:
             })
             self.weight_history.append(best_individual.get_weights())
 
+            if (generation + 1) % 10 == 0:
+                print(f"Generation {generation + 1}: Best Fitness: {best_fitness_score} Best Move Rank: {best_move_rank}")
+
         self.weight_labels = best_individual.get_weight_labels()
         self.weight_bounds = best_individual.get_weight_bounds()
         return best_individual

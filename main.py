@@ -35,7 +35,6 @@ def main():
     config = read_config()
     print(f"{Fore.MAGENTA}~~~~~~~~~~~~~~~~~~~~   STARTING ALGORITHM   ~~~~~~~~~~~~~~~~~~~~{Style.RESET_ALL}")
 
-
     # Access game and algorithm choices
     game_name = config.get("Game", "name")
     algorithm_name = config.get("Algorithm", "name")
@@ -50,16 +49,18 @@ def main():
     if EVALUATE:
         weights_list = []
         # Number of boards to fit to.
-        num_boards_to_fit = 2
+        num_boards_to_fit = 100
         
         for game_num in range(num_boards_to_fit):
+            print(f"Evaluating: {game_num}")
+
             best_individual = None
             if algorithm_name == "genetic_algorithm":
                 # Create a GeneticAlgorithm instance
                 genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.8, seed=seed)
 
                 # Evolve the population for a certain number of generations
-                best_individual = genetic_algorithm.evolve(generations=500)
+                best_individual = genetic_algorithm.evolve(generations=100)
             elif algorithm_name == "pso":
                 pso = PSO(game_name, num_particles=10)
                 # Evolve the population for a certain number of generations
