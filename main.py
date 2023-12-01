@@ -114,7 +114,7 @@ def main():
             elif algorithm_name == "simulated_annealing":
                 simulated_annealing = SimulatedAnnealing(game_name, temperature=particles, seed=seed)
 
-                best_individual = simulated_annealing.iterate(iterations_per_temp=5)
+                best_individual = simulated_annealing.iterate(iterations_per_temp=4)
                 history = simulated_annealing.history
                 # simulated_annealing.plot_evolution_history()
         
