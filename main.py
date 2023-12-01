@@ -43,16 +43,18 @@ def main():
     print(f"Selected Game: {game_name}")
     print(f"Selected Algorithm: {algorithm_name}")
     
-    EVALUATE = False
-    LAYER_OPTMIZATION = True
+    EVALUATE = True
+    LAYER_OPTMIZATION = False
     
     if EVALUATE:
         weights_list = []
         # Number of boards to fit to.
-        num_boards_to_fit = 100
-        
+        num_boards_to_fit = 50
+        iterations = 500
+        seed = 1
         for game_num in range(num_boards_to_fit):
             print(f"Evaluating: {game_num}")
+            print(f"Iterations {iterations}")
 
             best_individual = None
             if algorithm_name == "genetic_algorithm":
@@ -62,9 +64,9 @@ def main():
                 # Evolve the population for a certain number of generations
                 best_individual = genetic_algorithm.evolve(generations=100)
             elif algorithm_name == "pso":
-                pso = PSO(game_name, num_particles=10)
+                pso = PSO(game_name, num_particles=10, seed=seed)
                 # Evolve the population for a certain number of generations
-                best_individual = pso.iterate(iterations=4)
+                best_individual = pso.iterate(iterations=iterations)
             elif algorithm_name == "simulated_annealing":
                 
                 simulated_annealing = SimulatedAnnealing(game_name, temperature=1, seed=seed)
@@ -78,18 +80,18 @@ def main():
             combined_weights[weight_idx] = sum([weights_list[i][weight_idx] for i in range(len(weights_list))])/len(weights_list)
         
         evaluations = []
-        num_evaluations = 2 #Number of times the weights are evaluated on different board states.
+        num_evaluations = 100 #Number of times the weights are evaluated on different board states.
         # Perform evaluations
         for evaluation in range(num_evaluations): 
-            fitness_score, best_move, index, num_moves = create_and_evaluate_game(game_name, combined_weights, evaluation)
+            fitness_score, best_move, index, num_moves = create_and_evaluate_game(game_name, combined_weights, evaluation+seed)
             evaluations.append((fitness_score, str(best_move), index, num_moves))
         
         print(evaluations)
         
-        file_path = "evaluations.json"
+        file_path = f"{algorithm_name}_{game_name}_evaluations_{iterations}.json"
         with open(file_path, 'w') as json_file:
             json.dump(evaluations, json_file)
-        with open("weights.json", 'w') as json_file:
+        with open(f"weights_{iterations}.json", 'w') as json_file:
             json.dump(combined_weights, json_file)
     
     elif LAYER_OPTMIZATION:
