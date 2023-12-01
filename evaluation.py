@@ -1,6 +1,17 @@
 import json
+import argparse
 
-file_path = 'evaluations.json'
+parser = argparse.ArgumentParser(description="Process a JSON file.")
+
+# Add the command-line argument for the filename
+parser.add_argument('-f', '--file', dest='filename', required=True, help='Path to the JSON file')
+
+# Parse the command-line arguments
+args = parser.parse_args()
+
+
+file_path = args.filename
+
 
 # Read the JSON data from the file
 with open(file_path, 'r') as json_file:

@@ -21,13 +21,12 @@ class PSO():
         
         # Initalize PSO weights/
         # TODO Verify these values.
-        scale = 0.15
-        self.a1 = 0.6
+        self.a1 = 0.8
         '''Inertia'''
-        self.a2 = 1*scale
-        self.a3 = 0.5*scale
+        self.a2 = 1
+        self.a3 = 1
         
-        self.momentum_limit = 4
+        self.momentum_limit = 5
 
         self.game_name = game_name
         self.num_particles = num_particles

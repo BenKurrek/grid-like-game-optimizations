@@ -43,16 +43,18 @@ def main():
     print(f"Selected Game: {game_name}")
     print(f"Selected Algorithm: {algorithm_name}")
     
-    EVALUATE = False
-    LAYER_OPTMIZATION = True
+    EVALUATE = True
+    LAYER_OPTMIZATION = False
     
     if EVALUATE:
         weights_list = []
         # Number of boards to fit to.
-        num_boards_to_fit = 100
-        
+        num_boards_to_fit = 50
+        iterations = 500
+        seed = 1
         for game_num in range(num_boards_to_fit):
             print(f"Evaluating: {game_num}")
+            print(f"Iterations {iterations}")
 
             best_individual = None
             if algorithm_name == "genetic_algorithm":
@@ -62,9 +64,9 @@ def main():
                 # Evolve the population for a certain number of generations
                 best_individual = genetic_algorithm.evolve(generations=100)
             elif algorithm_name == "pso":
-                pso = PSO(game_name, num_particles=10)
+                pso = PSO(game_name, num_particles=10, seed=seed)
                 # Evolve the population for a certain number of generations
-                best_individual = pso.iterate(iterations=4)
+                best_individual = pso.iterate(iterations=iterations)
             elif algorithm_name == "simulated_annealing":
                 
                 simulated_annealing = SimulatedAnnealing(game_name, temperature=1, seed=seed)
@@ -78,24 +80,25 @@ def main():
             combined_weights[weight_idx] = sum([weights_list[i][weight_idx] for i in range(len(weights_list))])/len(weights_list)
         
         evaluations = []
-        num_evaluations = 2 #Number of times the weights are evaluated on different board states.
+        num_evaluations = 100 #Number of times the weights are evaluated on different board states.
         # Perform evaluations
         for evaluation in range(num_evaluations): 
-            fitness_score, best_move, index, num_moves = create_and_evaluate_game(game_name, combined_weights, evaluation)
+            fitness_score, best_move, index, num_moves = create_and_evaluate_game(game_name, combined_weights, evaluation+seed)
             evaluations.append((fitness_score, str(best_move), index, num_moves))
         
         print(evaluations)
         
-        file_path = "evaluations.json"
+        file_path = f"{algorithm_name}_{game_name}_evaluations_{iterations}.json"
         with open(file_path, 'w') as json_file:
             json.dump(evaluations, json_file)
-        with open("weights.json", 'w') as json_file:
+        with open(f"weights_{iterations}.json", 'w') as json_file:
             json.dump(combined_weights, json_file)
     
     elif LAYER_OPTMIZATION:
         history = None
-        seed = 1
-        for particles in [0.001, 0.005, 0.01, 0.05, 0.1]:
+        seed = 24
+        iterations = 2000
+        for particles in [5,10,20]:
             if algorithm_name == "genetic_algorithm":
                 # Create a GeneticAlgorithm instance
                 genetic_algorithm = GeneticAlgorithm(game_name, population_size=20, mutation_rate=0.8, seed=seed)
@@ -107,7 +110,7 @@ def main():
             elif algorithm_name == "pso":
                 pso = PSO(game_name, num_particles=particles, seed=seed)
                 # Evolve the population for a certain number of generations
-                best_individual = pso.iterate(iterations=200)
+                best_individual = pso.iterate(iterations=iterations)
                 history = pso.history
                 # pso.plot_evolution_history()
             elif algorithm_name == "simulated_annealing":
@@ -121,10 +124,10 @@ def main():
             best_fitness_values = [entry["best_fitness"] for entry in history]
             
             # Plotting best fitness values
-            plt.plot(generations, best_fitness_values, linewidth=1.5, label=f"Temperature: {particles}")
-        plt.title(f'Best Fitness {game_name}')
-        plt.xlabel(f'Iterations {game_name}')
-        plt.ylabel(f'Fitness {game_name}')
+            plt.plot(generations, best_fitness_values, linewidth=1.5, label=f"Particles: {particles}")
+        plt.title(f'Best particle fitness comparison for {algorithm_name}\n with different numbers of particles on {game_name}.')
+        plt.xlabel('Iterations')
+        plt.ylabel('Fitness')
         # Add a legend
         plt.legend()
 
